@@ -200,7 +200,7 @@ public class SpawnerHandler implements Listener {
 
         // Check if the item exists and has the spawner inventory item key, if it does then cancel the event
         if (clickedItem != null) {
-            if (clickedItem == null || !clickedItem.hasItemMeta()) {
+            if (!clickedItem.hasItemMeta()) {
                 return;
             }
 
