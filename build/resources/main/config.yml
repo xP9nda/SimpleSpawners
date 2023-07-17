@@ -1,0 +1,70 @@
+# formatting information:
+# see https://docs.advntr.dev/minimessage/format.html for colored text usage
+
+messages:
+  reload: "<#35855b>SimpleSpawners <#ffffff>| Config has been reloaded."
+  spawnerOpen: "<#35855b>SimpleSpawners <#ffffff>| Accessing your spawner..."
+  spawnerOpenFailed: "<#35855b>SimpleSpawners <#ffffff>| You do not own this spawner."
+  spawnerPlace: "<#35855b>SimpleSpawners <#ffffff>| You have <#35855b>placed<#ffffff> a private spawner."
+  spawnerAttemptBreak: "<#35855b>SimpleSpawners <#ffffff>| You can not break spawners. <#35855b>Sneak right click<#ffffff> to open the spawner's menu."
+  spawnerPickup: "<#35855b>SimpleSpawners <#ffffff>| You have <#35855b>picked up<#ffffff> a spawner."
+
+settings:
+  # spawnerDefaultBehaviour: true | false
+  # this option toggles the default spawning of mobs from spawners
+  # this is recommended to be kept false as spawners generate items with this plugin
+  spawnerDefaultBehaviour: false
+
+# primaryMenu
+# this is the menu that players see when interacting with an owned spawner
+# an owned spawner is one that has been placed down by a player
+primaryMenu:
+  information:
+    rows: 1
+    title: "Spawner Inspector"
+  items:
+    info:
+      slot: 1
+      material: DIAMOND
+      displayName: "<#35855b>Info"
+      lore:
+        - ""
+        - "<#ffffff>» <#35855b>Mob: <#ffffff><mob>"
+        - "<#ffffff>» <#35855b>Owner: <#ffffff><owner>"
+        - ""
+    pickup:
+      slot: 7
+      material: RED_STAINED_GLASS_PANE
+      displayName: "<#35855b>Pickup Spawner"
+      lore:
+        - ""
+        - "<#ffffff>» <#35855b>Left Click<#ffffff> to pick up this spawner"
+        - "<#ffffff>» All unclaimed drops and xp will be lost"
+        - ""
+
+# unownedMenu
+# this is the menu that players see when interacting with an unowned spawner
+# an unowned spawner would be one that generates naturally in the world
+unownedMenu:
+  information:
+    rows: 1
+    title: "Spawner Inspector"
+  items:
+    info:
+      slot: 3
+      material: DIAMOND
+      displayName: "<#35855b>Info"
+      lore:
+        - ""
+        - "<#ffffff>» <#35855b>Mob: <#ffffff><mob>"
+        - "<#ffffff>» <#35855b>Owner: <#ffffff>Unowned"
+        - ""
+    pickup:
+      slot: 5
+      material: RED_STAINED_GLASS_PANE
+      displayName: "<#35855b>Pickup Spawner"
+      lore:
+        - ""
+        - "<#ffffff>» <#35855b>Left Click<#ffffff> to pick up this spawner"
+        - "<#ffffff>» This spawner has no owner and has spawned naturally"
+        - ""
