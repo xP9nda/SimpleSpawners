@@ -29,6 +29,7 @@ dependencies {
     implementation("cloud.commandframework:cloud-paper:1.8.3")
     implementation("cloud.commandframework:cloud-annotations:1.8.3")
     implementation("com.google.code.gson:gson:2.8.5")
+    implementation("org.incendo.interfaces:interfaces-paper:1.0.0-SNAPSHOT")
 }
 
 bukkit {
@@ -38,7 +39,6 @@ bukkit {
     // API version (should be set for 1.13+)
     apiVersion = "1.13"
 }
-
 
 val targetJavaVersion = 17
 java {

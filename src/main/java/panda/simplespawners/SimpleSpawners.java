@@ -6,8 +6,10 @@ import cloud.commandframework.meta.SimpleCommandMeta;
 import cloud.commandframework.paper.PaperCommandManager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+import panda.simplespawners.data.DataSerialization;
 import panda.simplespawners.handlers.ConfigHandler;
 import panda.simplespawners.handlers.SpawnerHandler;
+import panda.simplespawners.menus.MenuHandler;
 import panda.simplespawners.utils.SpawnerUtils;
 
 public final class SimpleSpawners extends JavaPlugin {
@@ -16,6 +18,8 @@ public final class SimpleSpawners extends JavaPlugin {
     private ConfigHandler configHandler;
     private SpawnerHandler spawnerHandler;
     private SpawnerUtils spawnerUtils;
+    private DataSerialization dataSerialization;
+    private MenuHandler menuHandler;
 
     // Primary plugin methods
     @Override
@@ -33,6 +37,8 @@ public final class SimpleSpawners extends JavaPlugin {
         pluginManager.registerEvents(configHandler, this);
 
         spawnerUtils = new SpawnerUtils();
+        dataSerialization = new DataSerialization(this);
+        menuHandler = new MenuHandler();
 
         spawnerHandler = new SpawnerHandler(this);
         pluginManager.registerEvents(spawnerHandler, this);
@@ -69,5 +75,13 @@ public final class SimpleSpawners extends JavaPlugin {
 
     public SpawnerUtils getSpawnerUtils() {
         return spawnerUtils;
+    }
+
+    public DataSerialization getDataSerialization() {
+        return dataSerialization;
+    }
+
+    public MenuHandler getMenuHandler() {
+        return menuHandler;
     }
 }

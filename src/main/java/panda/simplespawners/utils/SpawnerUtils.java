@@ -30,6 +30,18 @@ public class SpawnerUtils {
         return null;
     }
 
+    public OfflinePlayer getOfflinePlayerFromUUID(UUID uuid) {
+        if (uuid == null) {
+            return null;
+        }
+
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+        if (offlinePlayer != null) {
+            return offlinePlayer;
+        }
+        return null;
+    }
+
     public String capitalizeWords(String input) {
         StringBuilder result = new StringBuilder();
         boolean capitalizeNext = true;
