@@ -22,11 +22,10 @@ primaryMenu:
   information:
     rows: 1
     title: "Spawner Inspector"
-    backgroundMaterial: BLACK_STAINED_GLASS_PANE
   items:
     info:
-      slotX: 1
-      slotY: 0
+      slotRow: 0
+      slotColumn: 1
       material: DIAMOND
       quantity: 1
       displayName: "<#35855b>Info"
@@ -36,8 +35,8 @@ primaryMenu:
         - "<#ffffff>» <#35855b>Owner: <#ffffff><owner>"
         - ""
     pickup:
-      slotX: 7
-      slotY: 0
+      slotRow: 0
+      slotColumn: 7
       material: RED_STAINED_GLASS_PANE
       quantity: 1
       displayName: "<#35855b>Pickup Spawner"
@@ -53,12 +52,27 @@ primaryMenu:
 unownedMenu:
   information:
     rows: 1
-    title: "Unclaimed Spawner"
-    backgroundMaterial: BLACK_STAINED_GLASS_PANE
+    title: "Unowned Spawner"
   items:
+    border0:
+      slotRow: 0
+      slotColumn: 0
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+        - ""
+    border1:
+      slotRow: 0
+      slotColumn: 1
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+        - ""
     info:
-      slotX: 3
-      slotY: 0
+      slotRow: 0
+      slotColumn: 3
       material: DIAMOND
       quantity: 1
       displayName: "<#35855b>Info"
@@ -68,8 +82,8 @@ unownedMenu:
         - "<#ffffff>» <#35855b>Owner: <#ffffff>Unowned"
         - ""
     pickup:
-      slotX: 5
-      slotY: 0
+      slotRow: 0
+      slotColumn: 5
       material: RED_STAINED_GLASS_PANE
       quantity: 1
       displayName: "<#35855b>Pickup Spawner"
@@ -77,4 +91,20 @@ unownedMenu:
         - ""
         - "<#ffffff>» <#35855b>Left Click<#ffffff> to pick up this spawner"
         - "<#ffffff>» This spawner has no owner and has spawned naturally"
+        - ""
+    border7:
+      slotRow: 0
+      slotColumn: 7
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+        - ""
+    border8:
+      slotRow: 0
+      slotColumn: 8
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
         - ""

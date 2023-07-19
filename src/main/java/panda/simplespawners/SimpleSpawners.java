@@ -4,12 +4,13 @@ import cloud.commandframework.annotations.AnnotationParser;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.meta.SimpleCommandMeta;
 import cloud.commandframework.paper.PaperCommandManager;
+import fr.minuskube.inv.InventoryManager;
+import fr.minuskube.inv.content.InventoryProvider;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import panda.simplespawners.data.DataSerialization;
 import panda.simplespawners.handlers.ConfigHandler;
 import panda.simplespawners.handlers.SpawnerHandler;
-import panda.simplespawners.menus.MenuHandler;
 import panda.simplespawners.utils.SpawnerUtils;
 
 public final class SimpleSpawners extends JavaPlugin {
@@ -19,7 +20,7 @@ public final class SimpleSpawners extends JavaPlugin {
     private SpawnerHandler spawnerHandler;
     private SpawnerUtils spawnerUtils;
     private DataSerialization dataSerialization;
-    private MenuHandler menuHandler;
+    private InventoryManager inventoryManager;
 
     // Primary plugin methods
     @Override
@@ -38,10 +39,11 @@ public final class SimpleSpawners extends JavaPlugin {
 
         spawnerUtils = new SpawnerUtils();
         dataSerialization = new DataSerialization(this);
-        menuHandler = new MenuHandler();
 
         spawnerHandler = new SpawnerHandler(this);
         pluginManager.registerEvents(spawnerHandler, this);
+
+        inventoryManager = new InventoryManager(this);
 
         // Commands
         try {
@@ -81,7 +83,7 @@ public final class SimpleSpawners extends JavaPlugin {
         return dataSerialization;
     }
 
-    public MenuHandler getMenuHandler() {
-        return menuHandler;
+    public InventoryManager getInventoryManager() {
+        return inventoryManager;
     }
 }

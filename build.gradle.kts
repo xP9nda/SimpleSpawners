@@ -26,10 +26,10 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT")
 
+    implementation("fr.minuskube.inv:smart-invs:1.2.7")
     implementation("cloud.commandframework:cloud-paper:1.8.3")
     implementation("cloud.commandframework:cloud-annotations:1.8.3")
     implementation("com.google.code.gson:gson:2.8.5")
-    implementation("org.incendo.interfaces:interfaces-paper:1.0.0-SNAPSHOT")
 }
 
 bukkit {

@@ -13,26 +13,20 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
-import org.incendo.interfaces.core.util.Vector2;
-import org.incendo.interfaces.paper.type.ChestInterface;
 import panda.simplespawners.SimpleSpawners;
 import panda.simplespawners.data.DataSerialization;
 import panda.simplespawners.data.SpawnerData;
-import panda.simplespawners.menus.MenuHandler;
-import panda.simplespawners.menus.MenuInterface;
-import panda.simplespawners.menus.MenuItem;
+import panda.simplespawners.menus.providers.OwnedSpawnerProvider;
+import panda.simplespawners.menus.providers.UnownedSpawnerProvider;
 import panda.simplespawners.utils.SpawnerUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 public class SpawnerHandler implements Listener {
@@ -42,7 +36,6 @@ public class SpawnerHandler implements Listener {
     private ConfigHandler configHandler;
     private SpawnerUtils spawnerUtils;
     private DataSerialization dataSerialization;
-    private MenuHandler menuHandler;
     private MiniMessage miniMsg = MiniMessage.miniMessage();
 
     private final NamespacedKey spawnerItemKey;
@@ -59,7 +52,6 @@ public class SpawnerHandler implements Listener {
         configHandler = simpleSpawnersPluginClass.getConfigHandler();
         spawnerUtils = simpleSpawnersPluginClass.getSpawnerUtils();
         dataSerialization = simpleSpawnersPluginClass.getDataSerialization();
-        menuHandler = simpleSpawnersPluginClass.getMenuHandler();
 
         // Set up namespace item keys
         spawnerItemKey = new NamespacedKey(simpleSpawnersPlugin, "item");
@@ -146,91 +138,44 @@ public class SpawnerHandler implements Listener {
         // Check if the spawner has no owner
         // select the correct menu to open and set up variables
         ConfigurationSection menuToOpen;
-        UUID spawnerOwnerUUID;
+        String spawnerMobTypeString = spawnerUtils.capitalizeWords(spawnerUtils.getSpawnerMobType(clickedBlock).name().toLowerCase());
         if (spawnerOwnerUUIDString == null) {
+            // Get the appropriate config sections
             menuToOpen = configHandler.getUnownedMenuConfigurationSection();
-            spawnerOwnerUUID = null;
-            spawnerOwnerUUIDString = "";
-        } else {
-            menuToOpen = configHandler.getPrimaryMenuConfigurationSection();
-            spawnerOwnerUUID = UUID.fromString(spawnerOwnerUUIDString);
+            ConfigurationSection menuInformationSection = menuToOpen.getConfigurationSection("information");
 
+            // Open the unclaimed spawner menu
+            UnownedSpawnerProvider inventoryToOpen = new UnownedSpawnerProvider(simpleSpawnersPlugin);
+            inventoryToOpen.setRows(menuInformationSection.getInt("rows"));
+            inventoryToOpen.setMenuTitle(menuInformationSection.getString("title"));
+
+            inventoryToOpen.setMobType(spawnerMobTypeString);
+            inventoryToOpen.setSpawnerOwner("Unowned");
+
+            inventoryToOpen.buildInventory();
+            inventoryToOpen.openBuiltInventory(player);
+        } else {
             // Check if the player who interacted with the spawner owns the spawner and send an appropriate message
             if (!spawnerOwnerUUIDString.equals(player.getUniqueId().toString())) {
                 player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerOpenFailedMessage()));
                 return;
             }
             player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerOpenMessage()));
+
+            // Get the appropriate config sections
+            menuToOpen = configHandler.getPrimaryMenuConfigurationSection();
+            ConfigurationSection menuInformationSection = menuToOpen.getConfigurationSection("information");
+
+            // Open the spawner menu
+            OwnedSpawnerProvider inventoryToOpen = new OwnedSpawnerProvider(simpleSpawnersPlugin);
+            inventoryToOpen.setRows(menuInformationSection.getInt("rows"));
+            inventoryToOpen.setMenuTitle(menuInformationSection.getString("title"));
+
+            inventoryToOpen.setMobType(spawnerMobTypeString);
+            inventoryToOpen.setSpawnerOwner(spawnerUtils.getPlayerNameFromUUID(UUID.fromString(spawnerOwnerUUIDString)));
+
+            inventoryToOpen.buildInventory();
+            inventoryToOpen.openBuiltInventory(player);
         }
-
-        final String finalSpawnerOwnerUUIDString = spawnerOwnerUUIDString;
-
-        // Construct and open the spawner menu
-        ConfigurationSection menuInformationSection = menuToOpen.getConfigurationSection("information");
-        int rows = menuInformationSection.getInt("rows");
-        String title = menuInformationSection.getString("title");
-        Material backgroundMaterial = Material.matchMaterial(menuInformationSection.getString("backgroundMaterial"));
-
-        // Create a new menu interface and set its properties
-        MenuInterface spawnerMenu = new MenuInterface();
-        spawnerMenu.setRows(rows);
-        spawnerMenu.setMenuTitle(title);
-        spawnerMenu.setBackgroundMaterial(backgroundMaterial);
-
-        // Get the menu items and set up the menu interface
-        List<MenuItem> menuItems = new ArrayList<>();
-        ConfigurationSection menuItemsSection = menuToOpen.getConfigurationSection("items");
-
-        for (String itemName : menuItemsSection.getKeys(false)) {
-            ConfigurationSection itemSection = menuItemsSection.getConfigurationSection(itemName);
-
-            // Item properties
-            int slotX = itemSection.getInt("slotX");
-            int slotY = itemSection.getInt("slotY");
-            int quantity = itemSection.getInt("quantity");
-            Material material = Material.matchMaterial(itemSection.getString("material"));
-            String displayName = itemSection.getString("displayName");
-            List<String> lore = itemSection.getStringList("lore");
-
-            // Set up new menu item object
-            MenuItem menuItem = new MenuItem();
-            menuItem.setItemName(displayName);
-            menuItem.setLore(lore);
-            menuItem.setMaterial(material);
-            menuItem.setSlot(Vector2.at(slotX, slotY));
-            menuItem.setStackQuantity(quantity);
-
-            menuItems.add(menuItem);
-        }
-        spawnerMenu.setMenuItems(menuItems);
-
-        // Request a menu creation
-        ChestInterface interfaceMenu = menuHandler.createMenuInterface(spawnerMenu);
-
-        // Show the menu to the player
-        menuHandler.showMenuInterfaceToPlayer(interfaceMenu, player);
     }
-
-    // Inventory click method
-//    @EventHandler
-//    public void onInventoryClick(InventoryClickEvent event) {
-//        ItemStack clickedItem = event.getCurrentItem();
-//
-//        // Check if the item exists and has the spawner inventory item key, if it does then cancel the event
-//        if (clickedItem != null) {
-//            if (!clickedItem.hasItemMeta()) {
-//                return;
-//            }
-//
-//            String itemKey = clickedItem.getItemMeta().getPersistentDataContainer().get(spawnerItemKey, PersistentDataType.STRING);
-//            if (itemKey == null) {
-//                return;
-//            }
-//
-//            if (itemKey.equals("spawnerInventoryItem")) {
-//                // Cancel the event
-//                event.setCancelled(true);
-//            }
-//        }
-//    }
 }
