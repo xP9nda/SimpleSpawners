@@ -107,8 +107,6 @@ public class OwnedSpawnerProvider implements InventoryProvider {
                 }
             });
 
-            simpleSpawnersPlugin.getSLF4JLogger().info("%s %s %s %s %s".formatted(slotRow, slotCol, itemName, materialName, displayName));
-
             contents.set(slotRow, slotCol, ClickableItem.of(itemStack, event -> {
                 if(event.isLeftClick()) {
                     player.sendMessage(miniMsg.deserialize("left clicked item"));
