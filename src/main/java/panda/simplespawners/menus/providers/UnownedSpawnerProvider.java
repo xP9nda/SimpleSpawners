@@ -28,9 +28,9 @@ public class UnownedSpawnerProvider implements InventoryProvider {
     private String mobType;
     private String spawnerOwner;
 
-    private Plugin simpleSpawnersPlugin;
-    private InventoryManager inventoryManager;
-    private ConfigHandler configHandler;
+    private final Plugin simpleSpawnersPlugin;
+    private final InventoryManager inventoryManager;
+    private final ConfigHandler configHandler;
     public static SmartInventory ownedSpawnerInventory;
     private static final MiniMessage miniMsg = MiniMessage.miniMessage();
 

@@ -44,6 +44,7 @@ public final class SimpleSpawners extends JavaPlugin {
         pluginManager.registerEvents(spawnerHandler, this);
 
         inventoryManager = new InventoryManager(this);
+        inventoryManager.init();
 
         // Commands
         try {

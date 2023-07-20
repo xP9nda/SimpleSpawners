@@ -15,12 +15,17 @@ settings:
   # this is recommended to be kept false as spawners generate items with this plugin
   spawnerDefaultBehaviour: false
 
+# menu information:
+# menu commands recognized by the plugin
+# "[pickup]" - command to allow the interacting player to pick up a spawner, this will send the messages.spawnerPickup message to the player
+# "[closeinv]" - command to close the interacting player's inventory
+
 # primaryMenu
 # this is the menu that players see when interacting with an owned spawner
 # an owned spawner is one that has been placed down by a player
 primaryMenu:
   information:
-    rows: 1
+    rows: 2
     title: "Spawner Inspector"
   items:
     info:
@@ -34,10 +39,12 @@ primaryMenu:
         - "<#ffffff>» <#35855b>Mob: <#ffffff><mob>"
         - "<#ffffff>» <#35855b>Owner: <#ffffff><owner>"
         - ""
+      leftClickCommands:
+      rightClickCommands:
     pickup:
       slotRow: 0
       slotColumn: 7
-      material: RED_STAINED_GLASS_PANE
+      material: BUCKET
       quantity: 1
       displayName: "<#35855b>Pickup Spawner"
       lore:
@@ -45,32 +52,87 @@ primaryMenu:
         - "<#ffffff>» <#35855b>Left Click<#ffffff> to pick up this spawner"
         - "<#ffffff>» All unclaimed drops and xp will be lost"
         - ""
+      leftClickCommands:
+        - "[pickup]"
+      rightClickCommands:
+    border10:
+      slotRow: 1
+      slotColumn: 0
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    border11:
+      slotRow: 1
+      slotColumn: 1
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    border12:
+      slotRow: 1
+      slotColumn: 2
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    border13:
+      slotRow: 1
+      slotColumn: 3
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    close:
+      slotRow: 1
+      slotColumn: 4
+      material: BARRIER
+      quantity: 1
+      displayName: "<#35855b>Close Menu"
+      lore:
+        - ""
+        - "<#ffffff>» <#35855b>Left Click<#ffffff> to close this menu"
+        - ""
+    border15:
+      slotRow: 1
+      slotColumn: 5
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    border16:
+      slotRow: 1
+      slotColumn: 6
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    border17:
+      slotRow: 1
+      slotColumn: 7
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    border18:
+      slotRow: 1
+      slotColumn: 8
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
 
 # unownedMenu
 # this is the menu that players see when interacting with an unowned spawner
 # an unowned spawner would be one that generates naturally in the world
 unownedMenu:
   information:
-    rows: 1
+    rows: 2
     title: "Unowned Spawner"
   items:
-    border0:
-      slotRow: 0
-      slotColumn: 0
-      material: BLACK_STAINED_GLASS_PANE
-      quantity: 1
-      displayName: ""
-      lore:
-    border1:
-      slotRow: 0
-      slotColumn: 1
-      material: BLACK_STAINED_GLASS_PANE
-      quantity: 1
-      displayName: ""
-      lore:
     info:
       slotRow: 0
-      slotColumn: 3
+      slotColumn: 2
       material: DIAMOND
       quantity: 1
       displayName: "<#35855b>Info"
@@ -81,8 +143,8 @@ unownedMenu:
         - ""
     pickup:
       slotRow: 0
-      slotColumn: 5
-      material: RED_STAINED_GLASS_PANE
+      slotColumn: 6
+      material: BUCKET
       quantity: 1
       displayName: "<#35855b>Pickup Spawner"
       lore:
@@ -90,15 +152,67 @@ unownedMenu:
         - "<#ffffff>» <#35855b>Left Click<#ffffff> to pick up this spawner"
         - "<#ffffff>» This spawner has no owner and has spawned naturally"
         - ""
-    border7:
-      slotRow: 0
+    border10:
+      slotRow: 1
+      slotColumn: 0
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    border11:
+      slotRow: 1
+      slotColumn: 1
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    border12:
+      slotRow: 1
+      slotColumn: 2
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    border13:
+      slotRow: 1
+      slotColumn: 3
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    close:
+      slotRow: 1
+      slotColumn: 4
+      material: BARRIER
+      quantity: 1
+      displayName: "<#35855b>Close Menu"
+      lore:
+        - ""
+        - "<#ffffff>» <#35855b>Left Click<#ffffff> to close this menu"
+        - ""
+    border15:
+      slotRow: 1
+      slotColumn: 5
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    border16:
+      slotRow: 1
+      slotColumn: 6
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    border17:
+      slotRow: 1
       slotColumn: 7
       material: BLACK_STAINED_GLASS_PANE
       quantity: 1
       displayName: ""
       lore:
-    border8:
-      slotRow: 0
+    border18:
+      slotRow: 1
       slotColumn: 8
       material: BLACK_STAINED_GLASS_PANE
       quantity: 1
