@@ -18,7 +18,7 @@ settings:
 # menu information:
 # menu commands recognized by the plugin
 # "[pickup]" - command to allow the interacting player to pick up a spawner, this will send the messages.spawnerPickup message to the player
-# "[closeinv]" - command to close the interacting player's inventory
+# "[close]" - command to close the interacting player's inventory
 
 # primaryMenu
 # this is the menu that players see when interacting with an owned spawner

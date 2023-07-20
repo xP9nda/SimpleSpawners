@@ -113,12 +113,12 @@ public class UnownedSpawnerProvider implements InventoryProvider {
                 e.setCancelled(true);
 
                 // Find any events that should be run
-                List<String> leftClickEvents = itemSection.getStringList("leftClickEvents");
-                List<String> rightClickEvents = itemSection.getStringList("rightClickEvents");
+                List<String> leftClickCommands = itemSection.getStringList("leftClickCommands");
+                List<String> rightClickCommands = itemSection.getStringList("rightClickCommands");
 
                 // Run left click events
-                if (e.isLeftClick() && !leftClickEvents.isEmpty()) {
-                    for (String commandString : leftClickEvents) {
+                if (e.isLeftClick() && !leftClickCommands.isEmpty()) {
+                    for (String commandString : leftClickCommands) {
                         if (commandString.equalsIgnoreCase("[pickup]")) {
                             // todo: add pickup event
                             continue;
@@ -131,8 +131,8 @@ public class UnownedSpawnerProvider implements InventoryProvider {
                     }
                 }
 
-                if (e.isRightClick() && !rightClickEvents.isEmpty()) {
-                    for (String commandString : rightClickEvents) {
+                if (e.isRightClick() && !rightClickCommands.isEmpty()) {
+                    for (String commandString : rightClickCommands) {
                         if (commandString.equalsIgnoreCase("[pickup]")) {
                             // todo: add pickup event
                             continue;
