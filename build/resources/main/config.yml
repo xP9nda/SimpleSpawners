@@ -61,7 +61,6 @@ unownedMenu:
       quantity: 1
       displayName: ""
       lore:
-        - ""
     border1:
       slotRow: 0
       slotColumn: 1
@@ -69,7 +68,6 @@ unownedMenu:
       quantity: 1
       displayName: ""
       lore:
-        - ""
     info:
       slotRow: 0
       slotColumn: 3
@@ -99,7 +97,6 @@ unownedMenu:
       quantity: 1
       displayName: ""
       lore:
-        - ""
     border8:
       slotRow: 0
       slotColumn: 8
@@ -107,4 +104,3 @@ unownedMenu:
       quantity: 1
       displayName: ""
       lore:
-        - ""
