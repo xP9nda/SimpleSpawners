@@ -93,6 +93,9 @@ primaryMenu:
         - ""
         - "<#ffffff>» <#35855b>Left Click<#ffffff> to close this menu"
         - ""
+      leftClickCommands:
+        - "[close]"
+      rightClickCommands:
     border15:
       slotRow: 1
       slotColumn: 5
@@ -190,6 +193,9 @@ unownedMenu:
         - ""
         - "<#ffffff>» <#35855b>Left Click<#ffffff> to close this menu"
         - ""
+      leftClickCommands:
+        - "[close]"
+      rightClickCommands:
     border15:
       slotRow: 1
       slotColumn: 5

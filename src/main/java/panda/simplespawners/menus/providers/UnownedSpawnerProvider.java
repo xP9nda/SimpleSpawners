@@ -10,6 +10,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -33,6 +34,7 @@ public class UnownedSpawnerProvider implements InventoryProvider {
     private final ConfigHandler configHandler;
     public static SmartInventory ownedSpawnerInventory;
     private static final MiniMessage miniMsg = MiniMessage.miniMessage();
+    private static final CommandSender consoleSender = Bukkit.getServer().getConsoleSender();
 
     // Constructor method
     public UnownedSpawnerProvider(Plugin loader) {
@@ -106,9 +108,41 @@ public class UnownedSpawnerProvider implements InventoryProvider {
                 }
             });
 
-            contents.set(slotRow, slotCol, ClickableItem.of(itemStack, event -> {
-                if (event.isLeftClick()) {
-                    player.sendMessage(miniMsg.deserialize("left clicked item"));
+            contents.set(slotRow, slotCol, ClickableItem.of(itemStack, e -> {
+                // Cancel the event
+                e.setCancelled(true);
+
+                // Find any events that should be run
+                List<String> leftClickEvents = itemSection.getStringList("leftClickEvents");
+                List<String> rightClickEvents = itemSection.getStringList("rightClickEvents");
+
+                // Run left click events
+                if (e.isLeftClick() && !leftClickEvents.isEmpty()) {
+                    for (String commandString : leftClickEvents) {
+                        if (commandString.equalsIgnoreCase("[pickup]")) {
+                            // todo: add pickup event
+                            continue;
+                        } else if (commandString.equalsIgnoreCase("[close]")) {
+                            player.closeInventory();
+                            continue;
+                        }
+
+                        Bukkit.dispatchCommand(consoleSender, commandString);
+                    }
+                }
+
+                if (e.isRightClick() && !rightClickEvents.isEmpty()) {
+                    for (String commandString : rightClickEvents) {
+                        if (commandString.equalsIgnoreCase("[pickup]")) {
+                            // todo: add pickup event
+                            continue;
+                        } else if (commandString.equalsIgnoreCase("[close]")) {
+                            player.closeInventory();
+                            continue;
+                        }
+
+                        Bukkit.dispatchCommand(consoleSender, commandString);
+                    }
                 }
             }));
         }
