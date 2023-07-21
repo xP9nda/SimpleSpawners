@@ -5,6 +5,8 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
@@ -16,6 +18,15 @@ public class SpawnerUtils {
             return spawner.getSpawnedType();
         }
         return null;
+    }
+
+    public EntityType getSpawnerMobTypeFromString(String entityTypeName) {
+        try {
+            return EntityType.valueOf(entityTypeName.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            // Invalid EntityType name provided
+            return null;
+        }
     }
 
     public String getPlayerNameFromUUID(UUID uuid) {
@@ -61,5 +72,16 @@ public class SpawnerUtils {
         }
 
         return result.toString();
+    }
+
+    public boolean hasOpenSlot(Player player) {
+        ItemStack[] inventoryContents = player.getInventory().getContents();
+
+        for (ItemStack item : inventoryContents) {
+            if (item == null || item.getType().isAir()) {
+                return true; // Found an open slot
+            }
+        }
+        return false; // No open slots found
     }
 }

@@ -1,3 +1,7 @@
+# ---------------- [ SIMPLESPAWNERS CONFIG ] ----------------
+# a plugin by https://github.com/xP9nda
+
+# ---------------- [ CHAT MESSAGES ] ----------------
 # formatting information:
 # see https://docs.advntr.dev/minimessage/format.html for colored text usage
 
@@ -8,24 +12,42 @@ messages:
   spawnerPlace: "<#35855b>SimpleSpawners <#ffffff>| You have <#35855b>placed<#ffffff> a private spawner."
   spawnerAttemptBreak: "<#35855b>SimpleSpawners <#ffffff>| You can not break spawners. <#35855b>Sneak right click<#ffffff> to open the spawner's menu."
   spawnerPickup: "<#35855b>SimpleSpawners <#ffffff>| You have <#35855b>picked up<#ffffff> a spawner."
+  spawnerPickupFullInventory: "<#35855b>SimpleSpawners <#ffffff>| Your inventory <#35855b>must be empty<#ffffff> to pick up a spawner."
 
+# ---------------- [ PLUGIN SETTINGS ] ----------------
 settings:
   # spawnerDefaultBehaviour: true | false
   # this option toggles the default spawning of mobs from spawners
   # this is recommended to be kept false as spawners generate items with this plugin
   spawnerDefaultBehaviour: false
 
+  # spawnerSneakRequirement: true | false
+  # this option toggles whether players need to sneak to open a spawner menu
+  # don't forget to change messages.spawnerAttemptBreak to reflect any changes made here
+  spawnerSneakRequirement: true
+
+# ---------------- [ ITEMS AND MENUS ] ----------------
+# title and lore tags recognized by the plugin (these are only for the spawner item)
+# "<mob>" - displays the mob type of the spawner
+
+# spawnerItem - this is the template of the item that is given to the player when they pick up a spawner
+spawnerItem:
+  displayName: "<#35855b><mob> <#ffffff>Spawner"
+  lore:
+    - ""
+    - "<#ffffff>» <#35855b>Mob: <#ffffff><mob>"
+    - ""
+
 # menu information:
 # menu commands recognized by the plugin
-# "[pickup]" - command to allow the interacting player to pick up a spawner, this will send the messages.spawnerPickup message to the player
+# "[pickup]" - command to allow the interacting player to pick up a spawner, this will send the messages.spawnerPickup or messages.spawnerPickupFullInventory message to the player
 # "[close]" - command to close the interacting player's inventory
 
-# title and lore tags recognized by the plugin
+# title and lore tags recognized by the plugin (these are only for menu items)
 # "<mob>" - displays the mob type of the spawner
 # "<owner>" - displays the owner of the spawner, defaulted to "Unowned" if no owner exists (naturally spawned spawner)
 
-# primaryMenu
-# this is the menu that players see when interacting with an owned spawner
+# primaryMenu - this is the menu that players see when interacting with an owned spawner
 # an owned spawner is one that has been placed down by a player
 primaryMenu:
   information:
@@ -129,8 +151,7 @@ primaryMenu:
       displayName: ""
       lore:
 
-# unownedMenu
-# this is the menu that players see when interacting with an unowned spawner
+# unownedMenu - this is the menu that players see when interacting with an unowned spawner
 # an unowned spawner would be one that generates naturally in the world
 unownedMenu:
   information:
@@ -159,6 +180,9 @@ unownedMenu:
         - "<#ffffff>» <#35855b>Left Click<#ffffff> to pick up this spawner"
         - "<#ffffff>» This spawner has no owner and has spawned naturally"
         - ""
+      leftClickCommands:
+        - "[pickup]"
+      rightClickCommands:
     border10:
       slotRow: 1
       slotColumn: 0

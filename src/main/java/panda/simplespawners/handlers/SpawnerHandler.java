@@ -1,6 +1,8 @@
 package panda.simplespawners.handlers;
 
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -8,6 +10,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,6 +31,7 @@ import panda.simplespawners.menus.providers.UnownedSpawnerProvider;
 import panda.simplespawners.utils.SpawnerUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class SpawnerHandler implements Listener {
@@ -41,6 +45,7 @@ public class SpawnerHandler implements Listener {
 
     private final NamespacedKey spawnerUUIDKey;
     private final NamespacedKey spawnerOwnerKey;
+    private final NamespacedKey mobTypeKey;
 
     private HashMap<UUID, SpawnerData> cachedSpawners = new HashMap<>();
 
@@ -57,6 +62,9 @@ public class SpawnerHandler implements Listener {
         // Set up namespace item keys
         spawnerUUIDKey = new NamespacedKey(simpleSpawnersPlugin, "uuid");
         spawnerOwnerKey = new NamespacedKey(simpleSpawnersPlugin, "owner");
+        mobTypeKey = new NamespacedKey(simpleSpawnersPlugin, "mobtype");
+
+        // todo: load in all saved spawners to the cachedSpawners hashmap
     }
 
     // Spawner event method
@@ -73,12 +81,13 @@ public class SpawnerHandler implements Listener {
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event) {
         Block placedBlock = event.getBlockPlaced();
-        ItemStack handItem = event.getItemInHand();
 
         // Check if the placed block was a spawner
         if (!(placedBlock.getType() == Material.SPAWNER)) {
             return;
         }
+
+        ItemStack handItem = event.getItemInHand();
 
         // Create a new spawner data class and set up the data
         SpawnerData spawnerData = new SpawnerData();
@@ -100,6 +109,18 @@ public class SpawnerHandler implements Listener {
         dataContainer.set(spawnerUUIDKey, PersistentDataType.STRING, spawnerData.getSpawnerUUID().toString());
         dataContainer.set(spawnerOwnerKey, PersistentDataType.STRING, player.getUniqueId().toString());
 
+        // Get the held item's data
+        PersistentDataContainer heldItemDataContainer = handItem.getItemMeta().getPersistentDataContainer();
+
+        // Set the block's spawn mob based on the saved mob type key of the held item
+        String savedMobType = heldItemDataContainer.get(mobTypeKey, PersistentDataType.STRING);
+        if (savedMobType != null) {
+            spawnerBlock.setSpawnedType(spawnerUtils.getSpawnerMobTypeFromString(savedMobType));
+        } else {
+            simpleSpawnersPlugin.getSLF4JLogger().warn("Spawner '%s' was placed but had an invalid mob type, defaulted to pig.".formatted(spawnerData.getSpawnerUUID().toString()));
+            spawnerBlock.setSpawnedType(EntityType.PIG);
+        }
+
         // Update the spawner's state
         spawnerBlock.update();
 
@@ -113,14 +134,44 @@ public class SpawnerHandler implements Listener {
         spawnerBlock.setType(Material.AIR);
     }
 
-    public void givePlayerSpawnerItem(Player player) {
+    public void givePlayerSpawnerItem(Player player, Block spawnerBlock) {
+        ConfigurationSection spawnerItemSection = configHandler.getSpawnerItemSection();
 
+        // Get item properties from the config
+        String displayName = spawnerItemSection.getString("displayName");
+        List<String> lore = spawnerItemSection.getStringList("lore");
+        String spawnerMobTypeString = spawnerUtils.capitalizeWords(spawnerUtils.getSpawnerMobType(spawnerBlock).name().toLowerCase());
+
+        // Create a new itemstack
+        ItemStack itemStack = new ItemStack(spawnerBlock.getType());
+
+        itemStack.editMeta(meta -> {
+            meta.displayName(miniMsg.deserialize(
+                    displayName,
+                    Placeholder.unparsed("mob", spawnerMobTypeString)
+            ).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+
+            meta.lore(
+                    lore.stream().map(loreMsg -> miniMsg.deserialize(
+                            loreMsg,
+                            Placeholder.unparsed("mob", spawnerMobTypeString)
+                    ).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE)).toList()
+            );
+
+            // Set up itemstack data
+            PersistentDataContainer heldItemDataContainer = meta.getPersistentDataContainer();
+
+            // Set the block's spawn mob based on the saved mob type key of the held item
+            heldItemDataContainer.set(mobTypeKey, PersistentDataType.STRING, spawnerUtils.getSpawnerMobType(spawnerBlock).name());
+        });
+
+        player.getInventory().addItem(itemStack);
     }
 
-    public void pickupSpawner(UUID spawnerUUID) {
+    public void pickupSpawner(UUID spawnerUUID, Player player, Location blockLocation) {
         SpawnerData spawnerData;
 
-        // Check if the UUID exists
+        // Check if the spawner UUID exists (is this an owned spawner? yes)
         if (spawnerUUID != null) {
             // Check if the spawner has been cached
             if (cachedSpawners.containsKey(spawnerUUID)) {
@@ -137,12 +188,27 @@ public class SpawnerHandler implements Listener {
             int z = spawnerData.getZ();
             String world = spawnerData.getWorld();
 
+            // Give the player a spawner
+            Location spawnerBlockLocation = new Location(Bukkit.getWorld(world), x, y, z);
+            Block savedSpawner = spawnerBlockLocation.getBlock();
+            givePlayerSpawnerItem(player, savedSpawner);
+
             // Destroy the block at the saved location
             destroyBlockAt(x, y, z, world);
 
             // Delete the spawner file
             dataSerialization.deleteSpawnerDataFile(spawnerUUID);
+
+            return;
         }
+
+        // If the spawner UUID does not exist (if this is an unowned spawner)
+
+        // Give the player a spawner
+        Block savedSpawner = blockLocation.getBlock();
+        givePlayerSpawnerItem(player, savedSpawner);
+
+        destroyBlockAt(blockLocation.blockX(), blockLocation.blockY(), blockLocation.blockZ(), blockLocation.getWorld().getName().toString());
     }
 
     // Spawner break method
@@ -204,6 +270,7 @@ public class SpawnerHandler implements Listener {
 
             unownedInventory.setMobType(spawnerMobTypeString);
             unownedInventory.setSpawnerOwner("Unowned");
+            unownedInventory.setSpawnerLocation(clickedBlock.getLocation());
 
             unownedInventory.buildInventory();
             unownedInventory.openBuiltInventory(player);

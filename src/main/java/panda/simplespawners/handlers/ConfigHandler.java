@@ -9,6 +9,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 
+import java.io.ObjectInputFilter;
+
 public class ConfigHandler implements Listener {
 
     // Variables
@@ -20,11 +22,14 @@ public class ConfigHandler implements Listener {
     private String spawnerPlaceMessage;
     private String spawnerAttemptBreakMessage;
     private String spawnerPickupMessage;
+    private String spawnerPickupFullInventoryMessage;
     private String spawnerOpenMessage;
     private String spawnerOpenFailedMessage;
     private boolean spawnerDefaultBehaviour;
+    private boolean spawnerSneakRequirement;
     private ConfigurationSection primaryMenuConfigurationSection;
     private ConfigurationSection unownedMenuConfigurationSection;
+    private ConfigurationSection spawnerItemSection;
 
     // Constructor method
     public ConfigHandler(Plugin loader) {
@@ -46,9 +51,12 @@ public class ConfigHandler implements Listener {
         setSpawnerOpenFailedMessage(pluginConfig.getString("messages.spawnerOpenFailed"));
         setSpawnerOpenMessage(pluginConfig.getString("messages.spawnerOpen"));
         setSpawnerPickupMessage(pluginConfig.getString("messages.spawnerPickup"));
+        setSpawnerPickupFullInventoryMessage(pluginConfig.getString("messages.spawnerPickupFullInventory"));
         setSpawnerDefaultBehaviour(pluginConfig.getBoolean("settings.spawnerDefaultBehaviour"));
+        setSpawnerSneakRequirement(pluginConfig.getBoolean("settings.spawnerSneakRequirement"));
         setPrimaryMenuConfigurationSection(pluginConfig.getConfigurationSection("primaryMenu"));
         setUnownedMenuConfigurationSection(pluginConfig.getConfigurationSection("unownedMenu"));
+        setSpawnerItemSection(pluginConfig.getConfigurationSection("spawnerItem"));
     }
 
     // Reload command method
@@ -57,6 +65,7 @@ public class ConfigHandler implements Listener {
     public void onReloadConfigurationCommand(Player commandSender) {
         // Reload the configuration
         reloadConfiguration();
+
         // Send a message to the command sender alerting them of the reload
         commandSender.sendMessage(miniMsg.deserialize(getReloadMessage()));
     }
@@ -132,5 +141,29 @@ public class ConfigHandler implements Listener {
 
     public void setUnownedMenuConfigurationSection(ConfigurationSection unownedMenuConfigurationSection) {
         this.unownedMenuConfigurationSection = unownedMenuConfigurationSection;
+    }
+
+    public boolean isSpawnerSneakRequirement() {
+        return spawnerSneakRequirement;
+    }
+
+    public void setSpawnerSneakRequirement(boolean spawnerSneakRequirement) {
+        this.spawnerSneakRequirement = spawnerSneakRequirement;
+    }
+
+    public ConfigurationSection getSpawnerItemSection() {
+        return spawnerItemSection;
+    }
+
+    public void setSpawnerItemSection(ConfigurationSection spawnerItemSection) {
+        this.spawnerItemSection = spawnerItemSection;
+    }
+
+    public String getSpawnerPickupFullInventoryMessage() {
+        return spawnerPickupFullInventoryMessage;
+    }
+
+    public void setSpawnerPickupFullInventoryMessage(String spawnerPickupFullInventoryMessage) {
+        this.spawnerPickupFullInventoryMessage = spawnerPickupFullInventoryMessage;
     }
 }

@@ -14,8 +14,8 @@ import java.util.UUID;
 public class DataSerialization {
 
     // Variables
-    private Plugin simpleSpawnersPlugin;
-    private Gson gson = new GsonBuilder().create();
+    private final Plugin simpleSpawnersPlugin;
+    private final Gson gson = new GsonBuilder().create();
 
     // Constructor method
     public DataSerialization(Plugin loader) {
@@ -85,7 +85,12 @@ public class DataSerialization {
 
         File file = new File(filePath);
         if (file.exists()) {
-            file.delete();
+            boolean result = file.delete();
+            if (result) {
+                simpleSpawnersPlugin.getSLF4JLogger().info("Spawner file '%s' removed due to spawner pickup.".formatted(spawnerUUID.toString()));
+            } else {
+                simpleSpawnersPlugin.getSLF4JLogger().info("Spawner '%s' was picked up but spawner file could not be deleted.".formatted(spawnerUUID.toString()));
+            }
         }
     }
 }

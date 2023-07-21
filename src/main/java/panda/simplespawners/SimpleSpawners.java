@@ -5,7 +5,6 @@ import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.meta.SimpleCommandMeta;
 import cloud.commandframework.paper.PaperCommandManager;
 import fr.minuskube.inv.InventoryManager;
-import fr.minuskube.inv.content.InventoryProvider;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import panda.simplespawners.data.DataSerialization;

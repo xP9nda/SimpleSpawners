@@ -18,6 +18,7 @@ import org.bukkit.plugin.Plugin;
 import panda.simplespawners.SimpleSpawners;
 import panda.simplespawners.handlers.ConfigHandler;
 import panda.simplespawners.handlers.SpawnerHandler;
+import panda.simplespawners.utils.SpawnerUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +37,7 @@ public class OwnedSpawnerProvider implements InventoryProvider {
     private final InventoryManager inventoryManager;
     private final ConfigHandler configHandler;
     private final SpawnerHandler spawnerHandler;
+    private final SpawnerUtils spawnerUtils;
     public static SmartInventory ownedSpawnerInventory;
     private static final MiniMessage miniMsg = MiniMessage.miniMessage();
     private static final CommandSender consoleSender = Bukkit.getServer().getConsoleSender();
@@ -47,6 +49,7 @@ public class OwnedSpawnerProvider implements InventoryProvider {
         inventoryManager = simpleSpawnersPluginClass.getInventoryManager();
         configHandler = simpleSpawnersPluginClass.getConfigHandler();
         spawnerHandler = simpleSpawnersPluginClass.getSpawnerHandler();
+        spawnerUtils = simpleSpawnersPluginClass.getSpawnerUtils();
     }
 
     // Method to build the inventory once all the properties have been set
@@ -103,15 +106,13 @@ public class OwnedSpawnerProvider implements InventoryProvider {
                     Placeholder.unparsed("owner", this.getSpawnerOwner())
                 ).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
 
-                if (lore != null || lore.isEmpty()) {
-                    meta.lore(
-                            lore.stream().map(loreMsg -> miniMsg.deserialize(
-                                    loreMsg,
-                                    Placeholder.unparsed("mob", this.getMobType()),
-                                    Placeholder.unparsed("owner", this.getSpawnerOwner())
-                            ).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE)).toList()
-                    );
-                }
+                meta.lore(
+                        lore.stream().map(loreMsg -> miniMsg.deserialize(
+                                loreMsg,
+                                Placeholder.unparsed("mob", this.getMobType()),
+                                Placeholder.unparsed("owner", this.getSpawnerOwner())
+                        ).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE)).toList()
+                );
             });
 
             contents.set(slotRow, slotCol, ClickableItem.of(itemStack, e -> {
@@ -126,8 +127,15 @@ public class OwnedSpawnerProvider implements InventoryProvider {
                 if (e.isLeftClick() && !leftClickCommands.isEmpty()) {
                     for (String commandString : leftClickCommands) {
                         if (commandString.equalsIgnoreCase("[pickup]")) {
-                            spawnerHandler.pickupSpawner(getSpawnerUUID());
-                            continue;
+                            // Check that the player's inventory is not full
+                            if (spawnerUtils.hasOpenSlot(player)) {
+                                player.closeInventory();
+                                spawnerHandler.pickupSpawner(getSpawnerUUID(), player, null);
+                                continue;
+                            } else {
+                                player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupFullInventoryMessage()));
+                                continue;
+                            }
                         } else if (commandString.equalsIgnoreCase("[close]")) {
                             player.closeInventory();
                             continue;
@@ -140,8 +148,15 @@ public class OwnedSpawnerProvider implements InventoryProvider {
                 if (e.isRightClick() && !rightClickCommands.isEmpty()) {
                     for (String commandString : rightClickCommands) {
                         if (commandString.equalsIgnoreCase("[pickup]")) {
-                            spawnerHandler.pickupSpawner(getSpawnerUUID());
-                            continue;
+                            // Check that the player's inventory is not full
+                            if (spawnerUtils.hasOpenSlot(player)) {
+                                player.closeInventory();
+                                spawnerHandler.pickupSpawner(getSpawnerUUID(), player, null);
+                                continue;
+                            } else {
+                                player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupFullInventoryMessage()));
+                                continue;
+                            }
                         } else if (commandString.equalsIgnoreCase("[close]")) {
                             player.closeInventory();
                             continue;
