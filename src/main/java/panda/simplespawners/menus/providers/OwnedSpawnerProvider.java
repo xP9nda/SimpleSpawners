@@ -17,8 +17,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import panda.simplespawners.SimpleSpawners;
 import panda.simplespawners.handlers.ConfigHandler;
+import panda.simplespawners.handlers.SpawnerHandler;
 
 import java.util.List;
+import java.util.UUID;
 
 public class OwnedSpawnerProvider implements InventoryProvider {
 
@@ -28,10 +30,12 @@ public class OwnedSpawnerProvider implements InventoryProvider {
 
     private String mobType;
     private String spawnerOwner;
+    private UUID spawnerUUID;
 
     private final Plugin simpleSpawnersPlugin;
     private final InventoryManager inventoryManager;
     private final ConfigHandler configHandler;
+    private final SpawnerHandler spawnerHandler;
     public static SmartInventory ownedSpawnerInventory;
     private static final MiniMessage miniMsg = MiniMessage.miniMessage();
     private static final CommandSender consoleSender = Bukkit.getServer().getConsoleSender();
@@ -42,6 +46,7 @@ public class OwnedSpawnerProvider implements InventoryProvider {
         SimpleSpawners simpleSpawnersPluginClass = (SimpleSpawners) Bukkit.getPluginManager().getPlugin("SimpleSpawners");
         inventoryManager = simpleSpawnersPluginClass.getInventoryManager();
         configHandler = simpleSpawnersPluginClass.getConfigHandler();
+        spawnerHandler = simpleSpawnersPluginClass.getSpawnerHandler();
     }
 
     // Method to build the inventory once all the properties have been set
@@ -121,7 +126,7 @@ public class OwnedSpawnerProvider implements InventoryProvider {
                 if (e.isLeftClick() && !leftClickCommands.isEmpty()) {
                     for (String commandString : leftClickCommands) {
                         if (commandString.equalsIgnoreCase("[pickup]")) {
-                            // todo: add pickup event
+                            spawnerHandler.pickupSpawner(getSpawnerUUID());
                             continue;
                         } else if (commandString.equalsIgnoreCase("[close]")) {
                             player.closeInventory();
@@ -135,7 +140,7 @@ public class OwnedSpawnerProvider implements InventoryProvider {
                 if (e.isRightClick() && !rightClickCommands.isEmpty()) {
                     for (String commandString : rightClickCommands) {
                         if (commandString.equalsIgnoreCase("[pickup]")) {
-                            // todo: add pickup event
+                            spawnerHandler.pickupSpawner(getSpawnerUUID());
                             continue;
                         } else if (commandString.equalsIgnoreCase("[close]")) {
                             player.closeInventory();
@@ -184,5 +189,13 @@ public class OwnedSpawnerProvider implements InventoryProvider {
 
     public void setSpawnerOwner(String spawnerOwner) {
         this.spawnerOwner = spawnerOwner;
+    }
+
+    public UUID getSpawnerUUID() {
+        return spawnerUUID;
+    }
+
+    public void setSpawnerUUID(UUID spawnerUUID) {
+        this.spawnerUUID = spawnerUUID;
     }
 }

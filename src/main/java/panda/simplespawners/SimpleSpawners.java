@@ -87,4 +87,8 @@ public final class SimpleSpawners extends JavaPlugin {
     public InventoryManager getInventoryManager() {
         return inventoryManager;
     }
+
+    public SpawnerHandler getSpawnerHandler() {
+        return spawnerHandler;
+    }
 }

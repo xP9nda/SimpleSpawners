@@ -2,6 +2,7 @@ package panda.simplespawners.handlers;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -38,7 +39,7 @@ public class SpawnerHandler implements Listener {
     private DataSerialization dataSerialization;
     private MiniMessage miniMsg = MiniMessage.miniMessage();
 
-    private final NamespacedKey spawnerItemKey;
+    private final NamespacedKey spawnerUUIDKey;
     private final NamespacedKey spawnerOwnerKey;
 
     private HashMap<UUID, SpawnerData> cachedSpawners = new HashMap<>();
@@ -54,7 +55,7 @@ public class SpawnerHandler implements Listener {
         dataSerialization = simpleSpawnersPluginClass.getDataSerialization();
 
         // Set up namespace item keys
-        spawnerItemKey = new NamespacedKey(simpleSpawnersPlugin, "item");
+        spawnerUUIDKey = new NamespacedKey(simpleSpawnersPlugin, "uuid");
         spawnerOwnerKey = new NamespacedKey(simpleSpawnersPlugin, "owner");
     }
 
@@ -79,11 +80,24 @@ public class SpawnerHandler implements Listener {
             return;
         }
 
+        // Create a new spawner data class and set up the data
+        SpawnerData spawnerData = new SpawnerData();
+        spawnerData.setX(placedBlock.getX());
+        spawnerData.setY(placedBlock.getY());
+        spawnerData.setZ(placedBlock.getZ());
+        spawnerData.setSpawnerUUID(UUID.randomUUID());
+        spawnerData.setWorld(placedBlock.getWorld().getName().toString());
+
+        // Save the data about this newly placed spawner and add it to the list of cached spawners
+        dataSerialization.saveSpawnerData(spawnerData);
+        cachedSpawners.put(spawnerData.getSpawnerUUID(), spawnerData);
+
+        // Set the data in the block itself
         Player player = event.getPlayer();
         CreatureSpawner spawnerBlock = (CreatureSpawner) placedBlock.getState();
         PersistentDataContainer dataContainer = spawnerBlock.getPersistentDataContainer();
 
-        // Set the block's NBT data
+        dataContainer.set(spawnerUUIDKey, PersistentDataType.STRING, spawnerData.getSpawnerUUID().toString());
         dataContainer.set(spawnerOwnerKey, PersistentDataType.STRING, player.getUniqueId().toString());
 
         // Update the spawner's state
@@ -91,6 +105,44 @@ public class SpawnerHandler implements Listener {
 
         // Alert the player they have placed a private spawner
         player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPlaceMessage()));
+    }
+
+    public void destroyBlockAt(int x, int y, int z, String world) {
+        // Get the block at the given coordinates and set it to air
+        Block spawnerBlock = new Location(Bukkit.getWorld(world), x, y, z).getBlock();
+        spawnerBlock.setType(Material.AIR);
+    }
+
+    public void givePlayerSpawnerItem(Player player) {
+
+    }
+
+    public void pickupSpawner(UUID spawnerUUID) {
+        SpawnerData spawnerData;
+
+        // Check if the UUID exists
+        if (spawnerUUID != null) {
+            // Check if the spawner has been cached
+            if (cachedSpawners.containsKey(spawnerUUID)) {
+                // Load in the spawner data from the cache
+                spawnerData = cachedSpawners.get(spawnerUUID);
+            } else {
+                // Load in the spawner data from the file
+                spawnerData = dataSerialization.loadSpawnerData(spawnerUUID);
+            }
+
+            // Get the x, y, z, world coords from the data
+            int x = spawnerData.getX();
+            int y = spawnerData.getY();
+            int z = spawnerData.getZ();
+            String world = spawnerData.getWorld();
+
+            // Destroy the block at the saved location
+            destroyBlockAt(x, y, z, world);
+
+            // Delete the spawner file
+            dataSerialization.deleteSpawnerDataFile(spawnerUUID);
+        }
     }
 
     // Spawner break method
@@ -134,6 +186,7 @@ public class SpawnerHandler implements Listener {
         CreatureSpawner spawner = (CreatureSpawner) clickedBlock.getState();
         PersistentDataContainer dataContainer = spawner.getPersistentDataContainer();
         String spawnerOwnerUUIDString = dataContainer.get(spawnerOwnerKey, PersistentDataType.STRING);
+        String spawnerUUIDString = dataContainer.get(spawnerUUIDKey, PersistentDataType.STRING);
 
         // Check if the spawner has no owner
         // select the correct menu to open and set up variables
@@ -145,15 +198,15 @@ public class SpawnerHandler implements Listener {
             ConfigurationSection menuInformationSection = menuToOpen.getConfigurationSection("information");
 
             // Open the unclaimed spawner menu
-            UnownedSpawnerProvider inventoryToOpen = new UnownedSpawnerProvider(simpleSpawnersPlugin);
-            inventoryToOpen.setRows(menuInformationSection.getInt("rows"));
-            inventoryToOpen.setMenuTitle(menuInformationSection.getString("title"));
+            UnownedSpawnerProvider unownedInventory = new UnownedSpawnerProvider(simpleSpawnersPlugin);
+            unownedInventory.setRows(menuInformationSection.getInt("rows"));
+            unownedInventory.setMenuTitle(menuInformationSection.getString("title"));
 
-            inventoryToOpen.setMobType(spawnerMobTypeString);
-            inventoryToOpen.setSpawnerOwner("Unowned");
+            unownedInventory.setMobType(spawnerMobTypeString);
+            unownedInventory.setSpawnerOwner("Unowned");
 
-            inventoryToOpen.buildInventory();
-            inventoryToOpen.openBuiltInventory(player);
+            unownedInventory.buildInventory();
+            unownedInventory.openBuiltInventory(player);
         } else {
             // Check if the player who interacted with the spawner owns the spawner and send an appropriate message
             if (!spawnerOwnerUUIDString.equals(player.getUniqueId().toString())) {
@@ -167,15 +220,16 @@ public class SpawnerHandler implements Listener {
             ConfigurationSection menuInformationSection = menuToOpen.getConfigurationSection("information");
 
             // Open the spawner menu
-            OwnedSpawnerProvider inventoryToOpen = new OwnedSpawnerProvider(simpleSpawnersPlugin);
-            inventoryToOpen.setRows(menuInformationSection.getInt("rows"));
-            inventoryToOpen.setMenuTitle(menuInformationSection.getString("title"));
+            OwnedSpawnerProvider ownedInventory = new OwnedSpawnerProvider(simpleSpawnersPlugin);
+            ownedInventory.setRows(menuInformationSection.getInt("rows"));
+            ownedInventory.setMenuTitle(menuInformationSection.getString("title"));
 
-            inventoryToOpen.setMobType(spawnerMobTypeString);
-            inventoryToOpen.setSpawnerOwner(spawnerUtils.getPlayerNameFromUUID(UUID.fromString(spawnerOwnerUUIDString)));
+            ownedInventory.setMobType(spawnerMobTypeString);
+            ownedInventory.setSpawnerOwner(spawnerUtils.getPlayerNameFromUUID(UUID.fromString(spawnerOwnerUUIDString)));
+            ownedInventory.setSpawnerUUID(UUID.fromString(spawnerUUIDString));
 
-            inventoryToOpen.buildInventory();
-            inventoryToOpen.openBuiltInventory(player);
+            ownedInventory.buildInventory();
+            ownedInventory.openBuiltInventory(player);
         }
     }
 }

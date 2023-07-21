@@ -41,6 +41,10 @@ public class DataSerialization {
     public void saveSpawnerData(SpawnerData data) {
         String jsonString = gson.toJson(data);
         String filePath = simpleSpawnersPlugin.getDataFolder().getAbsolutePath();
+
+        // Check that the directory exists
+        checkDirectoryExists(filePath + "/spawners/");
+
         filePath += "/spawners/%s.json".formatted(data.getSpawnerUUID());
 
         // Write the file
@@ -75,4 +79,13 @@ public class DataSerialization {
         return data;
     }
 
+    public void deleteSpawnerDataFile(UUID spawnerUUID) {
+        String filePath = simpleSpawnersPlugin.getDataFolder().getAbsolutePath();
+        filePath += "/spawners/%s.json".formatted(spawnerUUID.toString());
+
+        File file = new File(filePath);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
 }

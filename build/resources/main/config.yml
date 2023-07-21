@@ -20,6 +20,10 @@ settings:
 # "[pickup]" - command to allow the interacting player to pick up a spawner, this will send the messages.spawnerPickup message to the player
 # "[close]" - command to close the interacting player's inventory
 
+# title and lore tags recognized by the plugin
+# "<mob>" - displays the mob type of the spawner
+# "<owner>" - displays the owner of the spawner, defaulted to "Unowned" if no owner exists (naturally spawned spawner)
+
 # primaryMenu
 # this is the menu that players see when interacting with an owned spawner
 # an owned spawner is one that has been placed down by a player
@@ -158,28 +162,28 @@ unownedMenu:
     border10:
       slotRow: 1
       slotColumn: 0
-      material: BLACK_STAINED_GLASS_PANE
+      material: RED_STAINED_GLASS_PANE
       quantity: 1
       displayName: ""
       lore:
     border11:
       slotRow: 1
       slotColumn: 1
-      material: BLACK_STAINED_GLASS_PANE
+      material: RED_STAINED_GLASS_PANE
       quantity: 1
       displayName: ""
       lore:
     border12:
       slotRow: 1
       slotColumn: 2
-      material: BLACK_STAINED_GLASS_PANE
+      material: RED_STAINED_GLASS_PANE
       quantity: 1
       displayName: ""
       lore:
     border13:
       slotRow: 1
       slotColumn: 3
-      material: BLACK_STAINED_GLASS_PANE
+      material: RED_STAINED_GLASS_PANE
       quantity: 1
       displayName: ""
       lore:
@@ -199,28 +203,28 @@ unownedMenu:
     border15:
       slotRow: 1
       slotColumn: 5
-      material: BLACK_STAINED_GLASS_PANE
+      material: RED_STAINED_GLASS_PANE
       quantity: 1
       displayName: ""
       lore:
     border16:
       slotRow: 1
       slotColumn: 6
-      material: BLACK_STAINED_GLASS_PANE
+      material: RED_STAINED_GLASS_PANE
       quantity: 1
       displayName: ""
       lore:
     border17:
       slotRow: 1
       slotColumn: 7
-      material: BLACK_STAINED_GLASS_PANE
+      material: RED_STAINED_GLASS_PANE
       quantity: 1
       displayName: ""
       lore:
     border18:
       slotRow: 1
       slotColumn: 8
-      material: BLACK_STAINED_GLASS_PANE
+      material: RED_STAINED_GLASS_PANE
       quantity: 1
       displayName: ""
       lore:
