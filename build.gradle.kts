@@ -30,6 +30,7 @@ dependencies {
     implementation("cloud.commandframework:cloud-paper:1.8.3")
     implementation("cloud.commandframework:cloud-annotations:1.8.3")
     implementation("com.google.code.gson:gson:2.8.5")
+    implementation("org.xerial:sqlite-jdbc:3.36.0")
 }
 
 bukkit {

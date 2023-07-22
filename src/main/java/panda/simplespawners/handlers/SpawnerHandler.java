@@ -95,7 +95,7 @@ public class SpawnerHandler implements Listener {
         spawnerData.setY(placedBlock.getY());
         spawnerData.setZ(placedBlock.getZ());
         spawnerData.setSpawnerUUID(UUID.randomUUID());
-        spawnerData.setWorld(placedBlock.getWorld().getName().toString());
+        spawnerData.setWorld(placedBlock.getWorld().getName());
 
         // Save the data about this newly placed spawner and add it to the list of cached spawners
         dataSerialization.saveSpawnerData(spawnerData);
@@ -214,6 +214,8 @@ public class SpawnerHandler implements Listener {
     // Spawner break method
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
+        // todo: implement monetary cost for unowned spawners
+        // todo: implement sneak config setting for interacting with spawners
         Block placedBlock = event.getBlock();
 
         // Check if the placed block was a spawner
