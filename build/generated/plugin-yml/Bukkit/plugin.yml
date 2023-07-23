@@ -1,5 +1,0 @@
-name: SimpleSpawners
-version: 1.0.0-DEV
-main: panda.simplespawners.SimpleSpawners
-description: A customisable and easy to use overhaul of spawners.
-api-version: 1.13
