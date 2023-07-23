@@ -215,7 +215,6 @@ public class SpawnerHandler implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         // todo: implement monetary cost for unowned spawners
-        // todo: implement sneak config setting for interacting with spawners
         Block placedBlock = event.getBlock();
 
         // Check if the placed block was a spawner
@@ -241,9 +240,9 @@ public class SpawnerHandler implements Listener {
             return;
         }
 
-        // Check if the block was a spawner and if the player is sneaking
+        // Check if the block was not a spawner and if the player is not sneaking according to config requirement
         Player player = event.getPlayer();
-        if ((clickedBlock == null || !(clickedBlock.getType() == Material.SPAWNER)) || !player.isSneaking()) {
+        if ((clickedBlock == null || !(clickedBlock.getType() == Material.SPAWNER)) || (player.isSneaking() != configHandler.isSpawnerSneakRequirement())) {
             return;
         }
 
