@@ -13,6 +13,7 @@ messages:
   spawnerAttemptBreak: "<#35855b>SimpleSpawners <#ffffff>| You can not break spawners. <#35855b>Sneak right click<#ffffff> to open the spawner's menu."
   spawnerPickup: "<#35855b>SimpleSpawners <#ffffff>| You have <#35855b>picked up<#ffffff> a spawner."
   spawnerPickupFullInventory: "<#35855b>SimpleSpawners <#ffffff>| Your inventory <#35855b>must be empty<#ffffff> to pick up a spawner."
+  spawnerPickupNotEnoughMoney: "<#35855b>SimpleSpawners <#ffffff>| You do <#35855b>not<#ffffff> have <#35855b>enough money<#ffffff> to pick up that spawner."
 
 # ---------------- [ PLUGIN SETTINGS ] ----------------
 settings:

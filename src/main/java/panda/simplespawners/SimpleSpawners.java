@@ -5,14 +5,19 @@ import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.meta.SimpleCommandMeta;
 import cloud.commandframework.paper.PaperCommandManager;
 import fr.minuskube.inv.InventoryManager;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.command.CommandSender;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import panda.simplespawners.data.DataSerialization;
 import panda.simplespawners.handlers.ConfigHandler;
 import panda.simplespawners.handlers.SpawnerHandler;
 import panda.simplespawners.utils.SpawnerUtils;
 
-public final class SimpleSpawners extends JavaPlugin {
+public final class SimpleSpawners extends JavaPlugin implements Listener {
 
     // Variables
     private ConfigHandler configHandler;
@@ -20,11 +25,15 @@ public final class SimpleSpawners extends JavaPlugin {
     private SpawnerUtils spawnerUtils;
     private DataSerialization dataSerialization;
     private InventoryManager inventoryManager;
+    private Economy economy;
+    private boolean vaultLoaded = false;
 
     // Primary plugin methods
     @Override
     public void onEnable() {
         // Plugin startup logic
+
+        // todo: implement sql database option over separate json file format
 
         // Config
         saveDefaultConfig();
@@ -63,11 +72,41 @@ public final class SimpleSpawners extends JavaPlugin {
 
         // Timed events
         // todo: set up spawner schedule tasks here
+
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+    }
+
+    @EventHandler
+    public void onPluginEnable(PluginEnableEvent event) {
+        if (event.getPlugin().getName().equals("Vault")) {
+            if (setupEconomy()) {
+                this.getSLF4JLogger().info("Vault and required plugins loaded, enabling SimpleSpawners...");
+                vaultLoaded = true;
+                // Continue enabling your plugin
+                getServer().getPluginManager().registerEvents(this, this);
+            } else {
+                this.getSLF4JLogger().error("Vault is loaded, but required plugins are not available.");
+            }
+        }
+    }
+
+    // Vault methods
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
+
+        economy = rsp.getProvider();
+        return economy != null;
     }
 
     // Getter methods
@@ -89,5 +128,9 @@ public final class SimpleSpawners extends JavaPlugin {
 
     public SpawnerHandler getSpawnerHandler() {
         return spawnerHandler;
+    }
+
+    public Economy getEconomy() {
+        return economy;
     }
 }

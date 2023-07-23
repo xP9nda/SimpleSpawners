@@ -8,6 +8,7 @@ import fr.minuskube.inv.content.InventoryProvider;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -38,6 +39,7 @@ public class OwnedSpawnerProvider implements InventoryProvider {
     private final ConfigHandler configHandler;
     private final SpawnerHandler spawnerHandler;
     private final SpawnerUtils spawnerUtils;
+    private final Economy economy;
     public static SmartInventory ownedSpawnerInventory;
     private static final MiniMessage miniMsg = MiniMessage.miniMessage();
     private static final CommandSender consoleSender = Bukkit.getServer().getConsoleSender();
@@ -50,6 +52,7 @@ public class OwnedSpawnerProvider implements InventoryProvider {
         configHandler = simpleSpawnersPluginClass.getConfigHandler();
         spawnerHandler = simpleSpawnersPluginClass.getSpawnerHandler();
         spawnerUtils = simpleSpawnersPluginClass.getSpawnerUtils();
+        economy = simpleSpawnersPluginClass.getEconomy();
     }
 
     // Method to build the inventory once all the properties have been set
@@ -129,14 +132,19 @@ public class OwnedSpawnerProvider implements InventoryProvider {
                 if (e.isLeftClick() && !leftClickCommands.isEmpty()) {
                     for (String commandString : leftClickCommands) {
                         if (commandString.equalsIgnoreCase("[pickup]")) {
-                            // Check that the player's inventory is not full
-                            if (spawnerUtils.hasOpenSlot(player)) {
-                                player.closeInventory();
-                                spawnerHandler.pickupSpawner(getSpawnerUUID(), player, null);
+                            // Check that the player has enough money
+                            if (economy.getBalance(player) >= configHandler.getOwnedMoneyPickupCost()) {
+                                // Check that the player's inventory is not full
+                                if (spawnerUtils.hasOpenSlot(player)) {
+                                    player.closeInventory();
+                                    spawnerHandler.pickupSpawner(getSpawnerUUID(), player, null);
+                                } else {
+                                    player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupFullInventoryMessage()));
+                                }
+                                continue;
                             } else {
-                                player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupFullInventoryMessage()));
+                                player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupNotEnoughMoney()));
                             }
-                            continue;
                         } else if (commandString.equalsIgnoreCase("[close]")) {
                             player.closeInventory();
                             continue;
@@ -149,14 +157,19 @@ public class OwnedSpawnerProvider implements InventoryProvider {
                 if (e.isRightClick() && !rightClickCommands.isEmpty()) {
                     for (String commandString : rightClickCommands) {
                         if (commandString.equalsIgnoreCase("[pickup]")) {
-                            // Check that the player's inventory is not full
-                            if (spawnerUtils.hasOpenSlot(player)) {
-                                player.closeInventory();
-                                spawnerHandler.pickupSpawner(getSpawnerUUID(), player, null);
+                            // Check that the player has enough money
+                            if (economy.getBalance(player) >= configHandler.getOwnedMoneyPickupCost()) {
+                                // Check that the player's inventory is not full
+                                if (spawnerUtils.hasOpenSlot(player)) {
+                                    player.closeInventory();
+                                    spawnerHandler.pickupSpawner(getSpawnerUUID(), player, null);
+                                } else {
+                                    player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupFullInventoryMessage()));
+                                }
+                                continue;
                             } else {
-                                player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupFullInventoryMessage()));
+                                player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupNotEnoughMoney()));
                             }
-                            continue;
                         } else if (commandString.equalsIgnoreCase("[close]")) {
                             player.closeInventory();
                             continue;

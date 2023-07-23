@@ -32,6 +32,7 @@ public class ConfigHandler implements Listener {
     private ConfigurationSection spawnerItemSection;
     private int unownedMoneyPickupCost;
     private int ownedMoneyPickupCost;
+    private String spawnerPickupNotEnoughMoney;
 
     // Constructor method
     public ConfigHandler(Plugin loader) {
@@ -58,6 +59,7 @@ public class ConfigHandler implements Listener {
         setSpawnerSneakRequirement(pluginConfig.getBoolean("settings.spawnerSneakRequirement"));
         setOwnedMoneyPickupCost(pluginConfig.getInt("settings.ownedMoneyPickupCost"));
         setUnownedMoneyPickupCost(pluginConfig.getInt("settings.unownedMoneyPickupCost"));
+        setSpawnerPickupNotEnoughMoney(pluginConfig.getString("settings.spawnerPickupNotEnoughMoney"));
         setPrimaryMenuConfigurationSection(pluginConfig.getConfigurationSection("primaryMenu"));
         setUnownedMenuConfigurationSection(pluginConfig.getConfigurationSection("unownedMenu"));
         setSpawnerItemSection(pluginConfig.getConfigurationSection("spawnerItem"));
@@ -185,5 +187,13 @@ public class ConfigHandler implements Listener {
 
     public void setOwnedMoneyPickupCost(int ownedMoneyPickupCost) {
         this.ownedMoneyPickupCost = ownedMoneyPickupCost;
+    }
+
+    public String getSpawnerPickupNotEnoughMoney() {
+        return spawnerPickupNotEnoughMoney;
+    }
+
+    public void setSpawnerPickupNotEnoughMoney(String spawnerPickupNotEnoughMoney) {
+        this.spawnerPickupNotEnoughMoney = spawnerPickupNotEnoughMoney;
     }
 }

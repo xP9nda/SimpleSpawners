@@ -3,6 +3,7 @@ package panda.simplespawners.handlers;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -41,6 +42,7 @@ public class SpawnerHandler implements Listener {
     private ConfigHandler configHandler;
     private SpawnerUtils spawnerUtils;
     private DataSerialization dataSerialization;
+    private Economy economy;
     private MiniMessage miniMsg = MiniMessage.miniMessage();
 
     private final NamespacedKey spawnerUUIDKey;
@@ -58,6 +60,7 @@ public class SpawnerHandler implements Listener {
         configHandler = simpleSpawnersPluginClass.getConfigHandler();
         spawnerUtils = simpleSpawnersPluginClass.getSpawnerUtils();
         dataSerialization = simpleSpawnersPluginClass.getDataSerialization();
+        economy = simpleSpawnersPluginClass.getEconomy();
 
         // Set up namespace item keys
         spawnerUUIDKey = new NamespacedKey(simpleSpawnersPlugin, "uuid");
@@ -169,6 +172,8 @@ public class SpawnerHandler implements Listener {
     }
 
     public void pickupSpawner(UUID spawnerUUID, Player player, Location blockLocation) {
+        // todo: implement monetary subtraction here
+
         SpawnerData spawnerData;
 
         // Check if the spawner UUID exists (is this an owned spawner? yes)
@@ -214,7 +219,6 @@ public class SpawnerHandler implements Listener {
     // Spawner break method
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
-        // todo: implement monetary cost for unowned spawners
         Block placedBlock = event.getBlock();
 
         // Check if the placed block was a spawner
