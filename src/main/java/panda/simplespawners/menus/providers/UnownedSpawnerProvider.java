@@ -100,16 +100,18 @@ public class UnownedSpawnerProvider implements InventoryProvider {
             itemStack.setAmount(quantity);
             itemStack.editMeta(meta -> {
                 meta.displayName(miniMsg.deserialize(
-                    displayName,
-                    Placeholder.unparsed("mob", getMobType()),
-                    Placeholder.unparsed("owner", getSpawnerOwner())
+                        displayName,
+                        Placeholder.unparsed("mob", getMobType()),
+                        Placeholder.unparsed("owner", getSpawnerOwner()),
+                        Placeholder.unparsed("money", spawnerUtils.formatNumberWithCommas(configHandler.getUnownedMoneyPickupCost()))
                 ).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
 
                 meta.lore(
                         lore.stream().map(loreMsg -> miniMsg.deserialize(
                                 loreMsg,
                                 Placeholder.unparsed("mob", this.getMobType()),
-                                Placeholder.unparsed("owner", this.getSpawnerOwner())
+                                Placeholder.unparsed("owner", this.getSpawnerOwner()),
+                                Placeholder.unparsed("money", spawnerUtils.formatNumberWithCommas(configHandler.getUnownedMoneyPickupCost()))
                         ).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE)).toList()
                 );
             });
@@ -130,11 +132,10 @@ public class UnownedSpawnerProvider implements InventoryProvider {
                             if (spawnerUtils.hasOpenSlot(player)) {
                                 player.closeInventory();
                                 spawnerHandler.pickupSpawner(null, player, getSpawnerLocation());
-                                continue;
                             } else {
                                 player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupFullInventoryMessage()));
-                                continue;
                             }
+                            continue;
                         } else if (commandString.equalsIgnoreCase("[close]")) {
                             player.closeInventory();
                             continue;
@@ -151,11 +152,10 @@ public class UnownedSpawnerProvider implements InventoryProvider {
                             if (spawnerUtils.hasOpenSlot(player)) {
                                 player.closeInventory();
                                 spawnerHandler.pickupSpawner(null, player, getSpawnerLocation());
-                                continue;
                             } else {
                                 player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupFullInventoryMessage()));
-                                continue;
                             }
+                            continue;
                         } else if (commandString.equalsIgnoreCase("[close]")) {
                             player.closeInventory();
                             continue;

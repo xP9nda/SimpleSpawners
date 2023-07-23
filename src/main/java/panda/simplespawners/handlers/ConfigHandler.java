@@ -30,6 +30,8 @@ public class ConfigHandler implements Listener {
     private ConfigurationSection primaryMenuConfigurationSection;
     private ConfigurationSection unownedMenuConfigurationSection;
     private ConfigurationSection spawnerItemSection;
+    private int unownedMoneyPickupCost;
+    private int ownedMoneyPickupCost;
 
     // Constructor method
     public ConfigHandler(Plugin loader) {
@@ -54,6 +56,8 @@ public class ConfigHandler implements Listener {
         setSpawnerPickupFullInventoryMessage(pluginConfig.getString("messages.spawnerPickupFullInventory"));
         setSpawnerDefaultBehaviour(pluginConfig.getBoolean("settings.spawnerDefaultBehaviour"));
         setSpawnerSneakRequirement(pluginConfig.getBoolean("settings.spawnerSneakRequirement"));
+        setOwnedMoneyPickupCost(pluginConfig.getInt("settings.ownedMoneyPickupCost"));
+        setUnownedMoneyPickupCost(pluginConfig.getInt("settings.unownedMoneyPickupCost"));
         setPrimaryMenuConfigurationSection(pluginConfig.getConfigurationSection("primaryMenu"));
         setUnownedMenuConfigurationSection(pluginConfig.getConfigurationSection("unownedMenu"));
         setSpawnerItemSection(pluginConfig.getConfigurationSection("spawnerItem"));
@@ -165,5 +169,21 @@ public class ConfigHandler implements Listener {
 
     public void setSpawnerPickupFullInventoryMessage(String spawnerPickupFullInventoryMessage) {
         this.spawnerPickupFullInventoryMessage = spawnerPickupFullInventoryMessage;
+    }
+
+    public int getUnownedMoneyPickupCost() {
+        return unownedMoneyPickupCost;
+    }
+
+    public void setUnownedMoneyPickupCost(int unownedMoneyPickupCost) {
+        this.unownedMoneyPickupCost = unownedMoneyPickupCost;
+    }
+
+    public int getOwnedMoneyPickupCost() {
+        return ownedMoneyPickupCost;
+    }
+
+    public void setOwnedMoneyPickupCost(int ownedMoneyPickupCost) {
+        this.ownedMoneyPickupCost = ownedMoneyPickupCost;
     }
 }

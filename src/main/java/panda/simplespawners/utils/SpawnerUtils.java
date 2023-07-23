@@ -8,6 +8,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.text.DecimalFormat;
 import java.util.UUID;
 
 public class SpawnerUtils {
@@ -83,5 +84,10 @@ public class SpawnerUtils {
             }
         }
         return false; // No open slots found
+    }
+
+    public static String formatNumberWithCommas(int number) {
+        DecimalFormat decimalFormat = new DecimalFormat("#,###");
+        return decimalFormat.format(number);
     }
 }
