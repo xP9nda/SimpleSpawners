@@ -172,8 +172,6 @@ public class SpawnerHandler implements Listener {
     }
 
     public void pickupSpawner(UUID spawnerUUID, Player player, Location blockLocation) {
-        // todo: implement monetary subtraction here
-
         SpawnerData spawnerData;
 
         // Check if the spawner UUID exists (is this an owned spawner? yes)

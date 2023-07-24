@@ -7,17 +7,16 @@ import cloud.commandframework.paper.PaperCommandManager;
 import fr.minuskube.inv.InventoryManager;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.command.CommandSender;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import panda.simplespawners.data.DataSerialization;
 import panda.simplespawners.handlers.ConfigHandler;
 import panda.simplespawners.handlers.SpawnerHandler;
 import panda.simplespawners.utils.SpawnerUtils;
 
-public final class SimpleSpawners extends JavaPlugin implements Listener {
+public final class SimpleSpawners extends JavaPlugin {
 
     // Variables
     private ConfigHandler configHandler;
@@ -26,17 +25,46 @@ public final class SimpleSpawners extends JavaPlugin implements Listener {
     private DataSerialization dataSerialization;
     private InventoryManager inventoryManager;
     private Economy economy;
-    private boolean vaultLoaded = false;
+
+    private Plugin vaultInstance;
 
     // Primary plugin methods
-    @Override
-    public void onEnable() {
-        // Plugin startup logic
-
-        // todo: implement sql database option over separate json file format
-
+    private void enableFunctionality() {
         // Config
         saveDefaultConfig();
+
+        // Loop every second until vault is retrieved
+        int iterations = 0;
+        while (true) {
+            iterations++;
+
+            // Attempt to find Vault
+            vaultInstance = getServer().getPluginManager().getPlugin("Vault");
+            this.getSLF4JLogger().info("Attempting to retrieve Vault...");
+            if (vaultInstance != null) {
+                this.getSLF4JLogger().info("Vault was found, enabling plugin.");
+                break;
+            }
+
+            // Check that it isn't taking too long to find Vault
+            if (iterations >= 7) {
+                this.getSLF4JLogger().warn("Took too long to find Vault, please ensure you have Vault downloaded, SimpleSpawners will not work without it. Disabling plugin.");
+                this.getServer().getPluginManager().disablePlugin(this);
+                return;
+            }
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        // Register Vault and set up the economy
+        if (vaultInstance != null) {
+            setupEconomy();
+            this.getServer().getServicesManager().register(Economy.class, economy, vaultInstance, ServicePriority.Normal);
+        }
 
         // Setup
         var pluginManager = this.getServer().getPluginManager();
@@ -53,6 +81,7 @@ public final class SimpleSpawners extends JavaPlugin implements Listener {
 
         inventoryManager = new InventoryManager(this);
         inventoryManager.init();
+
 
         // Commands
         try {
@@ -72,26 +101,19 @@ public final class SimpleSpawners extends JavaPlugin implements Listener {
 
         // Timed events
         // todo: set up spawner schedule tasks here
+    }
 
+    @Override
+    public void onEnable() {
+        // Plugin startup logic
+        enableFunctionality();
+
+        // todo: implement sql database option over separate json file format
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-    }
-
-    @EventHandler
-    public void onPluginEnable(PluginEnableEvent event) {
-        if (event.getPlugin().getName().equals("Vault")) {
-            if (setupEconomy()) {
-                this.getSLF4JLogger().info("Vault and required plugins loaded, enabling SimpleSpawners...");
-                vaultLoaded = true;
-                // Continue enabling your plugin
-                getServer().getPluginManager().registerEvents(this, this);
-            } else {
-                this.getSLF4JLogger().error("Vault is loaded, but required plugins are not available.");
-            }
-        }
     }
 
     // Vault methods
