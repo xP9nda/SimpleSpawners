@@ -3,7 +3,6 @@ package panda.simplespawners.handlers;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -38,12 +37,11 @@ import java.util.UUID;
 public class SpawnerHandler implements Listener {
 
     // Variables
-    private Plugin simpleSpawnersPlugin;
-    private ConfigHandler configHandler;
-    private SpawnerUtils spawnerUtils;
-    private DataSerialization dataSerialization;
-    private Economy economy;
-    private MiniMessage miniMsg = MiniMessage.miniMessage();
+    private final Plugin simpleSpawnersPlugin;
+    private final ConfigHandler configHandler;
+    private final SpawnerUtils spawnerUtils;
+    private final DataSerialization dataSerialization;
+    private final MiniMessage miniMsg = MiniMessage.miniMessage();
 
     private final NamespacedKey spawnerUUIDKey;
     private final NamespacedKey spawnerOwnerKey;
@@ -57,10 +55,10 @@ public class SpawnerHandler implements Listener {
 
         // Get the plugin class and set up variables appropriately
         SimpleSpawners simpleSpawnersPluginClass = (SimpleSpawners) Bukkit.getPluginManager().getPlugin("SimpleSpawners");
+        assert simpleSpawnersPluginClass != null;
         configHandler = simpleSpawnersPluginClass.getConfigHandler();
         spawnerUtils = simpleSpawnersPluginClass.getSpawnerUtils();
         dataSerialization = simpleSpawnersPluginClass.getDataSerialization();
-        economy = simpleSpawnersPluginClass.getEconomy();
 
         // Set up namespace item keys
         spawnerUUIDKey = new NamespacedKey(simpleSpawnersPlugin, "uuid");
@@ -76,7 +74,6 @@ public class SpawnerHandler implements Listener {
         // If the config demands default spawner behaviour to be toggled off, cancel the spawn event
         if (!configHandler.isSpawnerDefaultBehaviour()) {
             event.setCancelled(true);
-//            simpleSpawnersPlugin.getSLF4JLogger().info("Spawner event cancelled.");
         }
     }
 
@@ -149,6 +146,7 @@ public class SpawnerHandler implements Listener {
         ItemStack itemStack = new ItemStack(spawnerBlock.getType());
 
         itemStack.editMeta(meta -> {
+            assert displayName != null;
             meta.displayName(miniMsg.deserialize(
                     displayName,
                     Placeholder.unparsed("mob", spawnerMobTypeString)
@@ -211,7 +209,7 @@ public class SpawnerHandler implements Listener {
         Block savedSpawner = blockLocation.getBlock();
         givePlayerSpawnerItem(player, savedSpawner);
 
-        destroyBlockAt(blockLocation.blockX(), blockLocation.blockY(), blockLocation.blockZ(), blockLocation.getWorld().getName().toString());
+        destroyBlockAt(blockLocation.getBlockX(), blockLocation.getBlockY(), blockLocation.getBlockZ(), blockLocation.getWorld().getName());
     }
 
     // Spawner break method
@@ -267,7 +265,8 @@ public class SpawnerHandler implements Listener {
             ConfigurationSection menuInformationSection = menuToOpen.getConfigurationSection("information");
 
             // Open the unclaimed spawner menu
-            UnownedSpawnerProvider unownedInventory = new UnownedSpawnerProvider(simpleSpawnersPlugin);
+            UnownedSpawnerProvider unownedInventory = new UnownedSpawnerProvider();
+            assert menuInformationSection != null;
             unownedInventory.setRows(menuInformationSection.getInt("rows"));
             unownedInventory.setMenuTitle(menuInformationSection.getString("title"));
 
@@ -290,12 +289,14 @@ public class SpawnerHandler implements Listener {
             ConfigurationSection menuInformationSection = menuToOpen.getConfigurationSection("information");
 
             // Open the spawner menu
-            OwnedSpawnerProvider ownedInventory = new OwnedSpawnerProvider(simpleSpawnersPlugin);
+            OwnedSpawnerProvider ownedInventory = new OwnedSpawnerProvider();
+            assert menuInformationSection != null;
             ownedInventory.setRows(menuInformationSection.getInt("rows"));
             ownedInventory.setMenuTitle(menuInformationSection.getString("title"));
 
             ownedInventory.setMobType(spawnerMobTypeString);
             ownedInventory.setSpawnerOwner(spawnerUtils.getPlayerNameFromUUID(UUID.fromString(spawnerOwnerUUIDString)));
+            assert spawnerUUIDString != null;
             ownedInventory.setSpawnerUUID(UUID.fromString(spawnerUUIDString));
 
             ownedInventory.buildInventory();

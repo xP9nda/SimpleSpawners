@@ -9,13 +9,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 
-import java.io.ObjectInputFilter;
-
 public class ConfigHandler implements Listener {
 
     // Variables
-    private Plugin simpleSpawnersPlugin;
-    private MiniMessage miniMsg = MiniMessage.miniMessage();
+    private final Plugin simpleSpawnersPlugin;
+    private final MiniMessage miniMsg = MiniMessage.miniMessage();
 
     // Config values
     private String reloadMessage;
@@ -55,11 +53,11 @@ public class ConfigHandler implements Listener {
         setSpawnerOpenMessage(pluginConfig.getString("messages.spawnerOpen"));
         setSpawnerPickupMessage(pluginConfig.getString("messages.spawnerPickup"));
         setSpawnerPickupFullInventoryMessage(pluginConfig.getString("messages.spawnerPickupFullInventory"));
+        setSpawnerPickupNotEnoughMoney(pluginConfig.getString("messages.spawnerPickupNotEnoughMoney"));
         setSpawnerDefaultBehaviour(pluginConfig.getBoolean("settings.spawnerDefaultBehaviour"));
         setSpawnerSneakRequirement(pluginConfig.getBoolean("settings.spawnerSneakRequirement"));
         setOwnedMoneyPickupCost(pluginConfig.getInt("settings.ownedMoneyPickupCost"));
         setUnownedMoneyPickupCost(pluginConfig.getInt("settings.unownedMoneyPickupCost"));
-        setSpawnerPickupNotEnoughMoney(pluginConfig.getString("settings.spawnerPickupNotEnoughMoney"));
         setPrimaryMenuConfigurationSection(pluginConfig.getConfigurationSection("primaryMenu"));
         setUnownedMenuConfigurationSection(pluginConfig.getConfigurationSection("unownedMenu"));
         setSpawnerItemSection(pluginConfig.getConfigurationSection("spawnerItem"));

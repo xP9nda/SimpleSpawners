@@ -16,13 +16,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import panda.simplespawners.SimpleSpawners;
 import panda.simplespawners.handlers.ConfigHandler;
 import panda.simplespawners.handlers.SpawnerHandler;
 import panda.simplespawners.utils.SpawnerUtils;
-
 import java.util.List;
+import java.util.Objects;
 
 public class UnownedSpawnerProvider implements InventoryProvider {
 
@@ -34,7 +33,6 @@ public class UnownedSpawnerProvider implements InventoryProvider {
     private String spawnerOwner;
     private Location spawnerLocation;
 
-    private final Plugin simpleSpawnersPlugin;
     private final InventoryManager inventoryManager;
     private final ConfigHandler configHandler;
     private final SpawnerHandler spawnerHandler;
@@ -45,9 +43,9 @@ public class UnownedSpawnerProvider implements InventoryProvider {
     private static final CommandSender consoleSender = Bukkit.getServer().getConsoleSender();
 
     // Constructor method
-    public UnownedSpawnerProvider(Plugin loader) {
-        simpleSpawnersPlugin = loader;
+    public UnownedSpawnerProvider() {
         SimpleSpawners simpleSpawnersPluginClass = (SimpleSpawners) Bukkit.getPluginManager().getPlugin("SimpleSpawners");
+        assert simpleSpawnersPluginClass != null;
         inventoryManager = simpleSpawnersPluginClass.getInventoryManager();
         configHandler = simpleSpawnersPluginClass.getConfigHandler();
         spawnerHandler = simpleSpawnersPluginClass.getSpawnerHandler();
@@ -71,6 +69,33 @@ public class UnownedSpawnerProvider implements InventoryProvider {
         ownedSpawnerInventory.open(player);
     }
 
+    public void runInventoryClickEvent(Player player, List<String> commands) {
+        for (String commandString : commands) {
+            if (commandString.equalsIgnoreCase("[pickup]")) {
+                // Check that the player has enough money
+                if (economy.getBalance(player) >= configHandler.getUnownedMoneyPickupCost()) {
+                    // Check that the player's inventory is not full
+                    if (spawnerUtils.hasOpenSlot(player)) {
+                        economy.withdrawPlayer(player, configHandler.getUnownedMoneyPickupCost());
+                        player.closeInventory();
+                        player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupMessage()));
+                        spawnerHandler.pickupSpawner(null, player, getSpawnerLocation());
+                    } else {
+                        player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupFullInventoryMessage()));
+                    }
+                } else {
+                    player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupNotEnoughMoney()));
+                }
+                continue;
+            } else if (commandString.equalsIgnoreCase("[close]")) {
+                player.closeInventory();
+                continue;
+            }
+
+            Bukkit.dispatchCommand(consoleSender, commandString);
+        }
+    }
+
     @Override
     public void init(Player player, InventoryContents contents) {
         // Called when an inventory is opened for the player
@@ -79,10 +104,12 @@ public class UnownedSpawnerProvider implements InventoryProvider {
         ConfigurationSection menuToOpen = configHandler.getUnownedMenuConfigurationSection();
         ConfigurationSection menuItemsSection = menuToOpen.getConfigurationSection("items");
 
+        assert menuItemsSection != null;
         for (String itemName : menuItemsSection.getKeys(false)) {
             ConfigurationSection itemSection = menuItemsSection.getConfigurationSection(itemName);
 
             // Get item properties from the config
+            assert itemSection != null;
             int slotRow = itemSection.getInt("slotRow");
             int slotCol = itemSection.getInt("slotColumn");
             int quantity = itemSection.getInt("quantity");
@@ -94,14 +121,15 @@ public class UnownedSpawnerProvider implements InventoryProvider {
             ItemStack itemStack;
 
             // Set up the item
-            if ((materialName.isEmpty() || materialName == null) && Material.matchMaterial(materialName) != null) {
+            if (materialName.isEmpty() && Material.matchMaterial(materialName) != null) {
                 itemStack = new ItemStack(Material.BARRIER);
             } else {
-                itemStack = new ItemStack(Material.matchMaterial(materialName));
+                itemStack = new ItemStack(Objects.requireNonNull(Material.matchMaterial(materialName)));
             }
 
             itemStack.setAmount(quantity);
             itemStack.editMeta(meta -> {
+                assert displayName != null;
                 meta.displayName(miniMsg.deserialize(
                         displayName,
                         Placeholder.unparsed("mob", getMobType()),
@@ -127,55 +155,13 @@ public class UnownedSpawnerProvider implements InventoryProvider {
                 List<String> leftClickCommands = itemSection.getStringList("leftClickCommands");
                 List<String> rightClickCommands = itemSection.getStringList("rightClickCommands");
 
-                // Run left click events
+                // Run commands
                 if (e.isLeftClick() && !leftClickCommands.isEmpty()) {
-                    for (String commandString : leftClickCommands) {
-                        if (commandString.equalsIgnoreCase("[pickup]")) {
-                            // Check that the player has enough money
-                            if (economy.getBalance(player) >= configHandler.getOwnedMoneyPickupCost()) {
-                                // Check that the player's inventory is not full
-                                if (spawnerUtils.hasOpenSlot(player)) {
-                                    player.closeInventory();
-                                    spawnerHandler.pickupSpawner(null, player, getSpawnerLocation());
-                                } else {
-                                    player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupFullInventoryMessage()));
-                                }
-                                continue;
-                            } else {
-                                player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupNotEnoughMoney()));
-                            }
-                        } else if (commandString.equalsIgnoreCase("[close]")) {
-                            player.closeInventory();
-                            continue;
-                        }
-
-                        Bukkit.dispatchCommand(consoleSender, commandString);
-                    }
+                    runInventoryClickEvent(player, leftClickCommands);
                 }
 
                 if (e.isRightClick() && !rightClickCommands.isEmpty()) {
-                    for (String commandString : rightClickCommands) {
-                        if (commandString.equalsIgnoreCase("[pickup]")) {
-                            // Check that the player has enough money
-                            if (economy.getBalance(player) >= configHandler.getOwnedMoneyPickupCost()) {
-                                // Check that the player's inventory is not full
-                                if (spawnerUtils.hasOpenSlot(player)) {
-                                    player.closeInventory();
-                                    spawnerHandler.pickupSpawner(null, player, getSpawnerLocation());
-                                } else {
-                                    player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupFullInventoryMessage()));
-                                }
-                                continue;
-                            } else {
-                                player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupNotEnoughMoney()));
-                            }
-                        } else if (commandString.equalsIgnoreCase("[close]")) {
-                            player.closeInventory();
-                            continue;
-                        }
-
-                        Bukkit.dispatchCommand(consoleSender, commandString);
-                    }
+                    runInventoryClickEvent(player, rightClickCommands);
                 }
             }));
         }
