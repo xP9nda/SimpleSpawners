@@ -73,10 +73,12 @@ public class OwnedSpawnerProvider implements InventoryProvider {
         for (String commandString : commands) {
             if (commandString.equalsIgnoreCase("[pickup]")) {
                 // Check that the player has enough money
-                if (economy.getBalance(player) >= configHandler.getOwnedMoneyPickupCost()) {
+                if ((economy.getBalance(player) >= configHandler.getOwnedMoneyPickupCost()) || (configHandler.getOwnedMoneyPickupCost() == 0)) {
                     // Check that the player's inventory is not full
                     if (spawnerUtils.hasOpenSlot(player)) {
-                        economy.withdrawPlayer(player, configHandler.getOwnedMoneyPickupCost());
+                        if (configHandler.getOwnedMoneyPickupCost() != 0) {
+                            economy.withdrawPlayer(player, configHandler.getOwnedMoneyPickupCost());
+                        }
                         player.closeInventory();
                         player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupMessage()));
                         spawnerHandler.pickupSpawner(getSpawnerUUID(), player, null);
