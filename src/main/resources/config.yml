@@ -17,6 +17,15 @@ messages:
 
 # ---------------- [ PLUGIN SETTINGS ] ----------------
 settings:
+  # spawnerStorageMethod: "json-flat" | "sqlite-flat"
+  # when spawners are placed down, their location is saved within a file so that the plugin can easily find all spawners to add money and drops
+
+  # <!!!!!> WARNING: this is a VERY DANGEROUS setting, and you SHOULD NOT to CHANGE this ONCE IT HAS BEEN SET <!!!!!>
+
+  # "json-flat" option will save each spawner as an individual .json file (DEFAULT OPTION)
+  # "sqlite-flat" option will save each spawner into a sqlite database file
+  spawnerStorageMethod: "json-flat"
+
   # spawnerDefaultBehaviour: (boolean) true | false
   # this option toggles the default spawning of mobs from spawners
   # this is recommended to be kept false as spawners generate items with this plugin

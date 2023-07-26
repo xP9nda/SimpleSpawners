@@ -12,6 +12,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import panda.simplespawners.data.DataSerialization;
+import panda.simplespawners.data.SQLiteManager;
 import panda.simplespawners.handlers.ConfigHandler;
 import panda.simplespawners.handlers.SpawnerHandler;
 import panda.simplespawners.utils.SpawnerUtils;
@@ -25,6 +26,7 @@ public final class SimpleSpawners extends JavaPlugin {
     private DataSerialization dataSerialization;
     private InventoryManager inventoryManager;
     private Economy economy;
+    private SQLiteManager sqliteManager;
 
     private Plugin vaultInstance;
 
@@ -73,6 +75,8 @@ public final class SimpleSpawners extends JavaPlugin {
         configHandler = new ConfigHandler(this);
         pluginManager.registerEvents(configHandler, this);
 
+        attemptSQLiteConnection();
+
         spawnerUtils = new SpawnerUtils();
         dataSerialization = new DataSerialization(this);
 
@@ -107,13 +111,25 @@ public final class SimpleSpawners extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         enableFunctionality();
-
-        // todo: implement sql database option over separate json file format
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+
+        // Disconnect from SQLite manager
+        if (sqliteManager != null) {
+            sqliteManager.disconnect();
+        }
+    }
+
+    public void attemptSQLiteConnection() {
+        // Check for spawner storage method
+        if (configHandler.getSpawnerStorageMethod().equalsIgnoreCase("sqlite-flat") && sqliteManager == null) {
+            // Setup SQLite connection
+            sqliteManager = new SQLiteManager(this, getDataFolder().getAbsolutePath() + "/spawners/");
+            sqliteManager.connect();
+        }
     }
 
     // Vault methods
@@ -154,5 +170,9 @@ public final class SimpleSpawners extends JavaPlugin {
 
     public Economy getEconomy() {
         return economy;
+    }
+
+    public SQLiteManager getSqliteManager() {
+        return sqliteManager;
     }
 }

@@ -183,27 +183,17 @@ public class SpawnerHandler implements Listener {
                 spawnerData = dataSerialization.loadSpawnerData(spawnerUUID);
             }
 
-            // Get the x, y, z, world coords from the data
-            int x = spawnerData.getX();
-            int y = spawnerData.getY();
-            int z = spawnerData.getZ();
+            // Get the world from the data to check if the file can be deleted
             String world = spawnerData.getWorld();
 
-            // Give the player a spawner
-            Location spawnerBlockLocation = new Location(Bukkit.getWorld(world), x, y, z);
-            Block savedSpawner = spawnerBlockLocation.getBlock();
-            givePlayerSpawnerItem(player, savedSpawner);
-
-            // Destroy the block at the saved location
-            destroyBlockAt(x, y, z, world);
-
-            // Delete the spawner file
-            dataSerialization.deleteSpawnerDataFile(spawnerUUID);
-
-            return;
+            // Check that none of the data is null
+            if (world == null || world.isEmpty() || world.isBlank()) {
+                simpleSpawnersPlugin.getSLF4JLogger().warn("Saved spawner data could not be found during spawner pickup. This may be because the storage method was changed mid-gameplay. Please ensure that the storage method is set before gameplay and is not changed while the server is online.");
+            } else {
+                // Delete the spawner file
+                dataSerialization.deleteSpawnerDataFile(spawnerUUID);
+            }
         }
-
-        // If the spawner UUID does not exist (if this is an unowned spawner)
 
         // Give the player a spawner
         Block savedSpawner = blockLocation.getBlock();
@@ -293,6 +283,7 @@ public class SpawnerHandler implements Listener {
             assert menuInformationSection != null;
             ownedInventory.setRows(menuInformationSection.getInt("rows"));
             ownedInventory.setMenuTitle(menuInformationSection.getString("title"));
+            ownedInventory.setSpawnerLocation(clickedBlock.getLocation());
 
             ownedInventory.setMobType(spawnerMobTypeString);
             ownedInventory.setSpawnerOwner(spawnerUtils.getPlayerNameFromUUID(UUID.fromString(spawnerOwnerUUIDString)));

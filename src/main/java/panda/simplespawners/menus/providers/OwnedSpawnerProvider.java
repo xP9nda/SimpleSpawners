@@ -10,6 +10,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
@@ -32,6 +33,7 @@ public class OwnedSpawnerProvider implements InventoryProvider {
     private String mobType;
     private String spawnerOwner;
     private UUID spawnerUUID;
+    private Location spawnerLocation;
 
     private final InventoryManager inventoryManager;
     private final ConfigHandler configHandler;
@@ -81,7 +83,7 @@ public class OwnedSpawnerProvider implements InventoryProvider {
                         }
                         player.closeInventory();
                         player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupMessage()));
-                        spawnerHandler.pickupSpawner(getSpawnerUUID(), player, null);
+                        spawnerHandler.pickupSpawner(getSpawnerUUID(), player, getSpawnerLocation());
                     } else {
                         player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupFullInventoryMessage()));
                     }
@@ -213,5 +215,13 @@ public class OwnedSpawnerProvider implements InventoryProvider {
 
     public void setSpawnerUUID(UUID spawnerUUID) {
         this.spawnerUUID = spawnerUUID;
+    }
+
+    public Location getSpawnerLocation() {
+        return spawnerLocation;
+    }
+
+    public void setSpawnerLocation(Location spawnerLocation) {
+        this.spawnerLocation = spawnerLocation;
     }
 }
