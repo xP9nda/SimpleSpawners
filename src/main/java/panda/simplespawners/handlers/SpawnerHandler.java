@@ -125,7 +125,9 @@ public class SpawnerHandler implements Listener {
         spawnerBlock.update();
 
         // Alert the player they have placed a private spawner
-        player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPlaceMessage()));
+        if (!configHandler.getSpawnerPlaceMessage().isEmpty()) {
+            player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPlaceMessage()));
+        }
     }
 
     public void destroyBlockAt(int x, int y, int z, String world) {
@@ -217,7 +219,9 @@ public class SpawnerHandler implements Listener {
 
         // Alert the player that spawners can not be broken
         Player player = event.getPlayer();
-        player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerAttemptBreakMessage()));
+        if (!configHandler.getSpawnerAttemptBreakMessage().isEmpty()) {
+            player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerAttemptBreakMessage()));
+        }
     }
 
     // Spawner interact method
@@ -269,10 +273,14 @@ public class SpawnerHandler implements Listener {
         } else {
             // Check if the player who interacted with the spawner owns the spawner and send an appropriate message
             if (!spawnerOwnerUUIDString.equals(player.getUniqueId().toString())) {
-                player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerOpenFailedMessage()));
+                if (!configHandler.getSpawnerOpenFailedMessage().isEmpty()) {
+                    player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerOpenFailedMessage()));
+                }
                 return;
             }
-            player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerOpenMessage()));
+            if (!configHandler.getSpawnerOpenMessage().isEmpty()) {
+                player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerOpenMessage()));
+            }
 
             // Get the appropriate config sections
             menuToOpen = configHandler.getPrimaryMenuConfigurationSection();

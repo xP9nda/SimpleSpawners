@@ -77,7 +77,9 @@ public class ConfigHandler implements Listener {
         reloadConfiguration();
 
         // Send a message to the command sender alerting them of the reload
-        commandSender.sendMessage(miniMsg.deserialize(getReloadMessage()));
+        if (!getReloadMessage().isEmpty()) {
+            commandSender.sendMessage(miniMsg.deserialize(getReloadMessage()));
+        }
     }
 
     // Getter and setter methods

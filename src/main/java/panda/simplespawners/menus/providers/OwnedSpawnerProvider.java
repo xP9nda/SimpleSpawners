@@ -82,13 +82,19 @@ public class OwnedSpawnerProvider implements InventoryProvider {
                             economy.withdrawPlayer(player, configHandler.getOwnedMoneyPickupCost());
                         }
                         player.closeInventory();
-                        player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupMessage()));
+                        if (!configHandler.getSpawnerPickupMessage().isEmpty()) {
+                            player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupMessage()));
+                        }
                         spawnerHandler.pickupSpawner(getSpawnerUUID(), player, getSpawnerLocation());
                     } else {
-                        player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupFullInventoryMessage()));
+                        if (!configHandler.getSpawnerPickupFullInventoryMessage().isEmpty()) {
+                            player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupFullInventoryMessage()));
+                        }
                     }
                 } else {
-                    player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupNotEnoughMoney()));
+                    if (!configHandler.getSpawnerPickupNotEnoughMoney().isEmpty()) {
+                        player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupNotEnoughMoney()));
+                    }
                 }
                 continue;
             } else if (commandString.equalsIgnoreCase("[close]")) {

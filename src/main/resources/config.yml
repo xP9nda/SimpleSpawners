@@ -4,6 +4,7 @@
 # ---------------- [ CHAT MESSAGES ] ----------------
 # formatting information:
 # see https://docs.advntr.dev/minimessage/format.html for text formatting options
+# to disable any message from being sent, set it as an empty string ("")
 
 messages:
   reload: "<#35855b>SimpleSpawners <#ffffff>| Config has been reloaded."
@@ -23,7 +24,7 @@ settings:
   # <!!!!!> WARNING: this is a VERY DANGEROUS setting, and you SHOULD NOT to CHANGE this ONCE IT HAS BEEN SET <!!!!!>
 
   # "json-flat" option will save each spawner as an individual .json file (DEFAULT OPTION)
-  # "sqlite-flat" option will save each spawner into a sqlite database file
+  # "sqlite-flat" option will save each spawner into a single sqlite database file
   spawnerStorageMethod: "json-flat"
 
   # spawnerDefaultBehaviour: (boolean) true | false
