@@ -208,9 +208,7 @@ public class ConfigHandler implements Listener {
     }
 
     public void setSpawnerStorageMethod(String spawnerStorageMethod) {
-        if (spawnerStorageMethod.equalsIgnoreCase("sqlite-flat")) {
-            simpleSpawnersPluginClass.attemptSQLiteConnection();
-        }
+        simpleSpawnersPluginClass.attemptSQLiteConnection();
         this.spawnerStorageMethod = spawnerStorageMethod;
     }
 }

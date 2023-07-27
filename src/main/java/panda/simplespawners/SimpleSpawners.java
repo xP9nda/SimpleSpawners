@@ -28,8 +28,6 @@ public final class SimpleSpawners extends JavaPlugin {
     private Economy economy;
     private SQLiteManager sqliteManager;
 
-    private Plugin vaultInstance;
-
     // Primary plugin methods
     private void enableFunctionality() {
         // Config
@@ -37,6 +35,7 @@ public final class SimpleSpawners extends JavaPlugin {
 
         // Loop every second until vault is retrieved
         int iterations = 0;
+        Plugin vaultInstance;
         while (true) {
             iterations++;
 
@@ -63,10 +62,8 @@ public final class SimpleSpawners extends JavaPlugin {
         }
 
         // Register Vault and set up the economy
-        if (vaultInstance != null) {
-            setupEconomy();
-            this.getServer().getServicesManager().register(Economy.class, economy, vaultInstance, ServicePriority.Normal);
-        }
+        setupEconomy();
+        this.getServer().getServicesManager().register(Economy.class, economy, vaultInstance, ServicePriority.Normal);
 
         // Setup
         var pluginManager = this.getServer().getPluginManager();
