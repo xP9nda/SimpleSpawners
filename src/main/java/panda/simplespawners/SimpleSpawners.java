@@ -83,7 +83,6 @@ public final class SimpleSpawners extends JavaPlugin {
         inventoryManager = new InventoryManager(this);
         inventoryManager.init();
 
-
         // Commands
         try {
             PaperCommandManager<CommandSender> commandManager = PaperCommandManager.createNative(
@@ -122,7 +121,7 @@ public final class SimpleSpawners extends JavaPlugin {
 
     public void attemptSQLiteConnection() {
         // Check for spawner storage method
-        if (configHandler.getSpawnerStorageMethod().equalsIgnoreCase("sqlite-flat") && sqliteManager == null) {
+        if (getConfigHandler().getSpawnerStorageMethod().equalsIgnoreCase("sqlite-flat") && sqliteManager == null) {
             // Setup SQLite connection
             sqliteManager = new SQLiteManager(this, getDataFolder().getAbsolutePath() + "/spawners/");
             sqliteManager.connect();

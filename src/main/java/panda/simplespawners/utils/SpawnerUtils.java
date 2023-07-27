@@ -1,14 +1,20 @@
 package panda.simplespawners.utils;
 
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 public class SpawnerUtils {
@@ -36,10 +42,7 @@ public class SpawnerUtils {
         }
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-        if (offlinePlayer != null) {
-            return offlinePlayer.getName();
-        }
-        return null;
+        return offlinePlayer.getName();
     }
 
     public OfflinePlayer getOfflinePlayerFromUUID(UUID uuid) {
@@ -48,10 +51,51 @@ public class SpawnerUtils {
         }
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-        if (offlinePlayer != null) {
-            return offlinePlayer;
+        return offlinePlayer;
+    }
+
+    public List<String> getStringListFromBlock(Block block, NamespacedKey key) {
+        if (block == null || key == null) {
+            return null;
         }
-        return null;
+
+        Bukkit.getLogger().info("get string listfrom block");
+        Bukkit.getLogger().info(String.valueOf(block));
+        Bukkit.getLogger().info(String.valueOf(key));
+
+        CreatureSpawner spawnerBlock = (CreatureSpawner) block.getState();
+        PersistentDataContainer dataContainer = spawnerBlock.getPersistentDataContainer();
+        String savedList = dataContainer.get(key, PersistentDataType.STRING);
+        assert savedList != null;
+
+        Bukkit.getLogger().info(savedList);
+        if (savedList.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Bukkit.getLogger().info("pass empty check");
+
+        // Split the string into a list
+        return Arrays.asList(savedList.split(";"));
+    }
+
+    public void storeStringListInBlock(Block block, List<String> stringList, NamespacedKey key) {
+        if (block == null || stringList == null || key == null) {
+            return;
+        }
+
+        Bukkit.getLogger().info("  store string:");
+        Bukkit.getLogger().info(stringList.toString());
+
+        CreatureSpawner spawnerBlock = (CreatureSpawner) block.getState();
+        PersistentDataContainer dataContainer = spawnerBlock.getPersistentDataContainer();
+
+        // Convert the list to a string
+        String savedString = String.join(";", stringList);
+        Bukkit.getLogger().info(savedString);
+
+        dataContainer.set(key, PersistentDataType.STRING, savedString);
+        spawnerBlock.update();
     }
 
     public String capitalizeWords(String input) {
@@ -76,14 +120,7 @@ public class SpawnerUtils {
     }
 
     public boolean hasOpenSlot(Player player) {
-        ItemStack[] inventoryContents = player.getInventory().getContents();
-
-        for (ItemStack item : inventoryContents) {
-            if (item == null || item.getType().isAir()) {
-                return true; // Found an open slot
-            }
-        }
-        return false; // No open slots found
+        return player.getInventory().firstEmpty() != -1;
     }
 
     public static String formatNumberWithCommas(int number) {

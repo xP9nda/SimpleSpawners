@@ -27,10 +27,15 @@ public class ConfigHandler implements Listener {
     private String spawnerPickupFullInventoryMessage;
     private String spawnerOpenMessage;
     private String spawnerOpenFailedMessage;
+    private String spawnerTrustSuccess;
+    private String spawnerTrustRemove;
+    private String spawnerTrustFail;
+    private String spawnerTrustAlreadyTrusted;
     private boolean spawnerDefaultBehaviour;
     private boolean spawnerSneakRequirement;
     private ConfigurationSection primaryMenuConfigurationSection;
     private ConfigurationSection unownedMenuConfigurationSection;
+    private ConfigurationSection spawnerTrustMenuConfigurationSection;
     private ConfigurationSection spawnerItemSection;
     private int unownedMoneyPickupCost;
     private int ownedMoneyPickupCost;
@@ -60,13 +65,23 @@ public class ConfigHandler implements Listener {
         setSpawnerPickupFullInventoryMessage(pluginConfig.getString("messages.spawnerPickupFullInventory"));
         setSpawnerPickupNotEnoughMoney(pluginConfig.getString("messages.spawnerPickupNotEnoughMoney"));
         setSpawnerStorageMethod(pluginConfig.getString("settings.spawnerStorageMethod", "json-flat"));
+        setSpawnerTrustSuccess(pluginConfig.getString("messages.spawnerTrustSuccess"));
+        setSpawnerTrustRemove(pluginConfig.getString("messages.spawnerTrustRemove"));
+        setSpawnerTrustFail(pluginConfig.getString("messages.spawnerTrustFail"));
+        setSpawnerTrustAlreadyTrusted(pluginConfig.getString("messages.spawnerTrustAlreadyTrusted"));
         setSpawnerDefaultBehaviour(pluginConfig.getBoolean("settings.spawnerDefaultBehaviour"));
         setSpawnerSneakRequirement(pluginConfig.getBoolean("settings.spawnerSneakRequirement"));
         setOwnedMoneyPickupCost(pluginConfig.getInt("settings.ownedMoneyPickupCost"));
         setUnownedMoneyPickupCost(pluginConfig.getInt("settings.unownedMoneyPickupCost"));
         setPrimaryMenuConfigurationSection(pluginConfig.getConfigurationSection("primaryMenu"));
         setUnownedMenuConfigurationSection(pluginConfig.getConfigurationSection("unownedMenu"));
+        setSpawnerTrustMenuConfigurationSection(pluginConfig.getConfigurationSection("trustingMenu"));
         setSpawnerItemSection(pluginConfig.getConfigurationSection("spawnerItem"));
+
+        // Attempt SQLite connection
+        if (simpleSpawnersPluginClass.getConfigHandler() != null) {
+            simpleSpawnersPluginClass.attemptSQLiteConnection();
+        }
     }
 
     // Reload command method
@@ -208,7 +223,46 @@ public class ConfigHandler implements Listener {
     }
 
     public void setSpawnerStorageMethod(String spawnerStorageMethod) {
-        simpleSpawnersPluginClass.attemptSQLiteConnection();
         this.spawnerStorageMethod = spawnerStorageMethod;
+    }
+
+    public String getSpawnerTrustSuccess() {
+        return spawnerTrustSuccess;
+    }
+
+    public void setSpawnerTrustSuccess(String spawnerTrustSuccess) {
+        this.spawnerTrustSuccess = spawnerTrustSuccess;
+    }
+
+    public String getSpawnerTrustRemove() {
+        return spawnerTrustRemove;
+    }
+
+    public void setSpawnerTrustRemove(String spawnerTrustRemove) {
+        this.spawnerTrustRemove = spawnerTrustRemove;
+    }
+
+    public String getSpawnerTrustFail() {
+        return spawnerTrustFail;
+    }
+
+    public void setSpawnerTrustFail(String spawnerTrustFail) {
+        this.spawnerTrustFail = spawnerTrustFail;
+    }
+
+    public ConfigurationSection getSpawnerTrustMenuConfigurationSection() {
+        return spawnerTrustMenuConfigurationSection;
+    }
+
+    public void setSpawnerTrustMenuConfigurationSection(ConfigurationSection spawnerTrustMenuConfigurationSection) {
+        this.spawnerTrustMenuConfigurationSection = spawnerTrustMenuConfigurationSection;
+    }
+
+    public String getSpawnerTrustAlreadyTrusted() {
+        return spawnerTrustAlreadyTrusted;
+    }
+
+    public void setSpawnerTrustAlreadyTrusted(String spawnerTrustAlreadyTrusted) {
+        this.spawnerTrustAlreadyTrusted = spawnerTrustAlreadyTrusted;
     }
 }

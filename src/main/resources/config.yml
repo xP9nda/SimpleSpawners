@@ -9,12 +9,21 @@
 messages:
   reload: "<#35855b>SimpleSpawners <#ffffff>| Config has been reloaded."
   spawnerOpen: "<#35855b>SimpleSpawners <#ffffff>| Accessing your spawner..."
-  spawnerOpenFailed: "<#35855b>SimpleSpawners <#ffffff>| You do not own this spawner."
+  spawnerOpenFailed: "<#35855b>SimpleSpawners <#ffffff>| You can not access this spawner."
   spawnerPlace: "<#35855b>SimpleSpawners <#ffffff>| You have <#35855b>placed<#ffffff> a private spawner."
   spawnerAttemptBreak: "<#35855b>SimpleSpawners <#ffffff>| You can not break spawners. <#35855b>Sneak right click<#ffffff> to open the spawner's menu."
   spawnerPickup: "<#35855b>SimpleSpawners <#ffffff>| You have <#35855b>picked up<#ffffff> a spawner."
   spawnerPickupFullInventory: "<#35855b>SimpleSpawners <#ffffff>| Your inventory <#35855b>must be empty<#ffffff> to pick up a spawner."
   spawnerPickupNotEnoughMoney: "<#35855b>SimpleSpawners <#ffffff>| You do <#35855b>not<#ffffff> have <#35855b>enough money<#ffffff> to pick up that spawner."
+
+  # --------[
+  # allowed tags: <player> - the player who is being trusted/untrusted
+  spawnerTrustSuccess: "<#35855b>SimpleSpawners <#ffffff>| You have trusted <#35855b><player><#ffffff> to this spawner."
+  spawnerTrustAlreadyTrusted: "<#35855b>SimpleSpawners <#ffffff>| <#35855b><player><#ffffff> is already trusted to this spawner."
+  spawnerTrustRemove: "<#35855b>SimpleSpawners <#ffffff>| You have untrusted <#35855b><player><#ffffff> from this spawner."
+  # --------]
+
+  spawnerTrustFail: "<#35855b>SimpleSpawners <#ffffff>| You are <#35855b>not allowed<#ffffff> to add trusted players to this spawner."
 
 # ---------------- [ PLUGIN SETTINGS ] ----------------
 settings:
@@ -47,7 +56,7 @@ settings:
   # set this to 0 to disable this functionality
   ownedMoneyPickupCost: 0
 
-# ---------------- [ ITEMS AND MENUS ] ----------------
+# ---------------- [ ITEMS ] ----------------
 # title and lore tags recognized by the plugin (these are only for the spawner item)
 # "<mob>" - displays the mob type of the spawner
 
@@ -59,11 +68,7 @@ spawnerItem:
     - "<#ffffff>» <#35855b>Mob: <#ffffff><mob>"
     - ""
 
-# menu information:
-# menu commands recognized by the plugin
-# "[pickup]" - command to allow the interacting player to pick up a spawner, this will send the messages.spawnerPickup or messages.spawnerPickupFullInventory message to the player
-# "[close]" - command to close the interacting player's inventory
-
+# ---------------- [ MENUS ] ----------------
 # title and lore tags recognized by the plugin (these are only for menu items)
 # "<mob>" - displays the mob type of the spawner
 # "<owner>" - displays the owner of the spawner, defaulted to "Unowned" if no owner exists (naturally spawned spawner)
@@ -71,6 +76,11 @@ spawnerItem:
 
 # primaryMenu - this is the menu that players see when interacting with an owned spawner
 # an owned spawner is one that has been placed down by a player
+
+# menu commands recognized by the plugin for primaryMenu
+# "[pickup]" - command to allow the interacting player to pick up a spawner, this will send the messages.spawnerPickup or messages.spawnerPickupFullInventory message to the player
+# "[close]" - command to close the interacting player's inventory
+# "[trustmenu]" - command to open the trust menu for the spawner
 primaryMenu:
   information:
     rows: 2
@@ -88,6 +98,20 @@ primaryMenu:
         - "<#ffffff>» <#35855b>Owner: <#ffffff><owner>"
         - ""
       leftClickCommands:
+      rightClickCommands:
+    trustmenu:
+      slotRow: 0
+      slotColumn: 2
+      material: EMERALD
+      quantity: 1
+      displayName: "<#35855b>Trust Menu"
+      lore:
+        - ""
+        - "<#ffffff>» <#35855b>Left Click<#ffffff> to open the trusting menu"
+        - "<#ffffff>» <#ffffff>Allow other players to use your spawner"
+        - ""
+      leftClickCommands:
+        - "[trustmenu]"
       rightClickCommands:
     pickup:
       slotRow: 0
@@ -173,8 +197,13 @@ primaryMenu:
       displayName: ""
       lore:
 
+
 # unownedMenu - this is the menu that players see when interacting with an unowned spawner
 # an unowned spawner would be one that generates naturally in the world
+
+# menu commands recognized by the plugin for unownedMenu
+# "[pickup]" - command to allow the interacting player to pick up a spawner, this will send the messages.spawnerPickup or messages.spawnerPickupFullInventory message to the player
+# "[close]" - command to close the interacting player's inventory
 unownedMenu:
   information:
     rows: 2
@@ -273,6 +302,121 @@ unownedMenu:
       slotRow: 1
       slotColumn: 8
       material: RED_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+
+# trustingMenu - this is the menu that players see to add players to their spawners
+# this menu will populate the information.pagedSlots slots with player heads for players to interact with
+# ONLY the spawner owner can add and remove trusted players to their spawner
+# ONLY the spawner owner can pick up their spawner
+
+# menu commands recognized by the plugin for trustingMenu
+# "[pickup]" - command to allow the interacting player to pick up a spawner, this will send the messages.spawnerPickup or messages.spawnerPickupFullInventory message to the player
+# "[close]" - command to close the interacting player's inventory
+# "[return]" - command to return to the main spawner menu
+# "[pagenext]" - command to go to the next page
+# "[pageprevious]" - command to go to the previous page
+trustingMenu:
+  information:
+    rows: 2
+    title: "Trust Players"
+    itemsPerPage: 7
+    pagedItemsStartRow: 0
+    pagedItemsStartColumn: 1
+    # title and lore tags recognized by the plugin (these are only for the paged item template)
+    # "<player>" - displays the name of the player
+
+    # pagedItemTemplate - this is the template of the item that will be displayed in the paged slots
+    # left-clicking on one of these items trusts the player to the spawner
+    pagedItemTemplate:
+      displayName: "<#35855b><player>"
+      lore:
+        - ""
+        - "<#ffffff>» <#35855b>Left Click<#ffffff> to trust this player"
+        - "<#ffffff>» <#35855b>Trusted players can do everything except:"
+        - "<#35855b>  1. <#ffffff>Pick up the spawner"
+        - "<#35855b>  2. <#ffffff>Add or remove trusted players"
+        - ""
+  items:
+    border10:
+      slotRow: 1
+      slotColumn: 0
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    pageprevious:
+      slotRow: 1
+      slotColumn: 1
+      material: PAPER
+      quantity: 1
+      displayName: "<#35855b>Previous Page"
+      lore:
+        - ""
+        - "<#ffffff>» <#35855b>Left Click<#ffffff> to go to the previous page"
+        - ""
+      leftClickCommands:
+        - "[pageprevious]"
+      rightClickCommands:
+    border12:
+      slotRow: 1
+      slotColumn: 2
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    border13:
+      slotRow: 1
+      slotColumn: 3
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    close:
+      slotRow: 1
+      slotColumn: 4
+      material: BARRIER
+      quantity: 1
+      displayName: "<#35855b>Return"
+      lore:
+        - ""
+        - "<#ffffff>» <#35855b>Left Click<#ffffff> to return to the main menu"
+        - ""
+      leftClickCommands:
+        - "[return]"
+      rightClickCommands:
+    border15:
+      slotRow: 1
+      slotColumn: 5
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    border16:
+      slotRow: 1
+      slotColumn: 6
+      material: BLACK_STAINED_GLASS_PANE
+      quantity: 1
+      displayName: ""
+      lore:
+    pagenext:
+      slotRow: 1
+      slotColumn: 7
+      material: PAPER
+      quantity: 1
+      displayName: "<#35855b>Next Page"
+      lore:
+        - ""
+        - "<#ffffff>» <#35855b>Left Click<#ffffff> to go to the next page"
+        - ""
+      leftClickCommands:
+        - "[pagenext]"
+      rightClickCommands:
+    border18:
+      slotRow: 1
+      slotColumn: 8
+      material: BLACK_STAINED_GLASS_PANE
       quantity: 1
       displayName: ""
       lore:

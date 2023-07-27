@@ -5,64 +5,60 @@ import fr.minuskube.inv.InventoryManager;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
+import fr.minuskube.inv.content.Pagination;
+import fr.minuskube.inv.content.SlotIterator;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 import panda.simplespawners.SimpleSpawners;
 import panda.simplespawners.handlers.ConfigHandler;
-import panda.simplespawners.handlers.SpawnerHandler;
 import panda.simplespawners.utils.SpawnerUtils;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
-public class OwnedSpawnerProvider implements InventoryProvider {
+
+public class TrustingProvider implements InventoryProvider {
 
     // Variables
     private int rows;
     private String menuTitle;
-
-    private String mobType;
+    private int pagedItemAmount;
     private String spawnerOwner;
-    private UUID spawnerUUID;
-    private Location spawnerLocation;
+    private OwnedSpawnerProvider previousMenu;
     private Block spawnerBlock;
+    private NamespacedKey spawnerMemberKey;
 
     private final InventoryManager inventoryManager;
     private final ConfigHandler configHandler;
-    private final SpawnerHandler spawnerHandler;
     private final SpawnerUtils spawnerUtils;
-    private final Economy economy;
-    public static SmartInventory ownedSpawnerInventory;
+    public static SmartInventory trustingInventory;
     private static final MiniMessage miniMsg = MiniMessage.miniMessage();
     private static final CommandSender consoleSender = Bukkit.getServer().getConsoleSender();
 
     // Constructor method
-    public OwnedSpawnerProvider() {
+    public TrustingProvider() {
         SimpleSpawners simpleSpawnersPluginClass = (SimpleSpawners) Bukkit.getPluginManager().getPlugin("SimpleSpawners");
         assert simpleSpawnersPluginClass != null;
         inventoryManager = simpleSpawnersPluginClass.getInventoryManager();
         configHandler = simpleSpawnersPluginClass.getConfigHandler();
-        spawnerHandler = simpleSpawnersPluginClass.getSpawnerHandler();
         spawnerUtils = simpleSpawnersPluginClass.getSpawnerUtils();
-        economy = simpleSpawnersPluginClass.getEconomy();
     }
 
     // Method to build the inventory once all the properties have been set
     public void buildInventory() {
-        ownedSpawnerInventory = SmartInventory.builder()
+        trustingInventory = SmartInventory.builder()
                 .manager(inventoryManager)
-                .id("OwnedSpawnerInventory")
+                .id("TrustingProvider")
                 .provider(this)
                 .size(this.getRows(), 9)
                 .title(this.getMenuTitle())
@@ -71,54 +67,22 @@ public class OwnedSpawnerProvider implements InventoryProvider {
 
     // Method to open the built inventory to the given player
     public void openBuiltInventory(Player player) {
-        ownedSpawnerInventory.open(player);
+        trustingInventory.open(player);
     }
 
-    public void runInventoryClickEvent(Player player, List<String> commands) {
+    public void runInventoryClickEvent(Player player, List<String> commands, Pagination pagination) {
         for (String commandString : commands) {
-            if (commandString.equalsIgnoreCase("[pickup]")) {
-                // Check that the player has enough money
-                if ((economy.getBalance(player) >= configHandler.getOwnedMoneyPickupCost()) || (configHandler.getOwnedMoneyPickupCost() == 0)) {
-                    // Check that the player's inventory is not full
-                    if (spawnerUtils.hasOpenSlot(player)) {
-                        if (configHandler.getOwnedMoneyPickupCost() != 0) {
-                            economy.withdrawPlayer(player, configHandler.getOwnedMoneyPickupCost());
-                        }
-                        player.closeInventory();
-                        if (!configHandler.getSpawnerPickupMessage().isEmpty()) {
-                            player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupMessage()));
-                        }
-                        spawnerHandler.pickupSpawner(getSpawnerUUID(), player, getSpawnerLocation());
-                    } else {
-                        if (!configHandler.getSpawnerPickupFullInventoryMessage().isEmpty()) {
-                            player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupFullInventoryMessage()));
-                        }
-                    }
-                } else {
-                    if (!configHandler.getSpawnerPickupNotEnoughMoney().isEmpty()) {
-                        player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerPickupNotEnoughMoney()));
-                    }
-                }
-                continue;
-            } else if (commandString.equalsIgnoreCase("[close]")) {
+            if (commandString.equalsIgnoreCase("[close]")) {
                 player.closeInventory();
                 continue;
-            } else if (commandString.equalsIgnoreCase("[trustmenu]")) {
-                // Open the trust menu
-                TrustingProvider trustSpawnerProvider = new TrustingProvider();
-                trustSpawnerProvider.setSpawnerOwner(getSpawnerOwner());
-
-                ConfigurationSection menuToOpen = configHandler.getSpawnerTrustMenuConfigurationSection();
-                ConfigurationSection menuInformationSection = menuToOpen.getConfigurationSection("information");
-                trustSpawnerProvider.setRows(menuInformationSection.getInt("rows"));
-                trustSpawnerProvider.setMenuTitle(menuInformationSection.getString("title"));
-                trustSpawnerProvider.setPreviousMenu(this);
-                trustSpawnerProvider.setPagedItemAmount(menuInformationSection.getInt("itemsPerPage"));
-                trustSpawnerProvider.setSpawnerBlock(getSpawnerBlock());
-                trustSpawnerProvider.setSpawnerMemberKey(spawnerHandler.getSpawnerMembersKey());
-
-                trustSpawnerProvider.buildInventory();
-                trustSpawnerProvider.openBuiltInventory(player);
+            } else if (commandString.equalsIgnoreCase("[return]")) {
+                getPreviousMenu().openBuiltInventory(player);
+                continue;
+            } else if (commandString.equalsIgnoreCase("[pagenext]")) {
+                trustingInventory.open(player, pagination.next().getPage());
+                continue;
+            } else if (commandString.equalsIgnoreCase("[pageprevious]")) {
+                trustingInventory.open(player, pagination.previous().getPage());
                 continue;
             }
 
@@ -131,9 +95,11 @@ public class OwnedSpawnerProvider implements InventoryProvider {
         // Called when an inventory is opened for the player
 
         // Get the items and add them to the menu
-        ConfigurationSection menuToOpen = configHandler.getPrimaryMenuConfigurationSection();
+        ConfigurationSection menuToOpen = configHandler.getSpawnerTrustMenuConfigurationSection();
         ConfigurationSection menuItemsSection = menuToOpen.getConfigurationSection("items");
+        Pagination pagination = contents.pagination();
 
+        // Set up normal menu items
         assert menuItemsSection != null;
         for (String itemName : menuItemsSection.getKeys(false)) {
             ConfigurationSection itemSection = menuItemsSection.getConfigurationSection(itemName);
@@ -163,17 +129,13 @@ public class OwnedSpawnerProvider implements InventoryProvider {
                 assert displayName != null;
                 meta.displayName(miniMsg.deserialize(
                         displayName,
-                        Placeholder.unparsed("mob", getMobType()),
-                        Placeholder.unparsed("owner", getSpawnerOwner()),
-                        Placeholder.unparsed("money", spawnerUtils.formatNumberWithCommas(configHandler.getOwnedMoneyPickupCost()))
+                        Placeholder.unparsed("owner", getSpawnerOwner())
                 ).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
 
                 meta.lore(
                         lore.stream().map(loreMsg -> miniMsg.deserialize(
                                 loreMsg,
-                                Placeholder.unparsed("mob", this.getMobType()),
-                                Placeholder.unparsed("owner", this.getSpawnerOwner()),
-                                Placeholder.unparsed("money", spawnerUtils.formatNumberWithCommas(configHandler.getOwnedMoneyPickupCost()))
+                                Placeholder.unparsed("owner", this.getSpawnerOwner())
                         ).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE)).toList()
                 );
             });
@@ -188,14 +150,82 @@ public class OwnedSpawnerProvider implements InventoryProvider {
 
                 // Run commands
                 if (e.isLeftClick() && !leftClickCommands.isEmpty()) {
-                    runInventoryClickEvent(player, leftClickCommands);
+                    runInventoryClickEvent(player, leftClickCommands, pagination);
                 }
 
                 if (e.isRightClick() && !rightClickCommands.isEmpty()) {
-                    runInventoryClickEvent(player, rightClickCommands);
+                    runInventoryClickEvent(player, rightClickCommands, pagination);
                 }
             }));
         }
+
+        // Set up paged items
+        ConfigurationSection menuInformationSection = menuToOpen.getConfigurationSection("information");
+        assert menuInformationSection != null;
+        ConfigurationSection pagedItemTemplate = menuInformationSection.getConfigurationSection("pagedItemTemplate");
+
+        Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
+        ClickableItem[] pagedItems = new ClickableItem[onlinePlayers.size() - 1];
+        int iterator = 0;
+
+        for ( Player trustablePlayer : onlinePlayers ) {
+            // Make sure that the player can not trust themselves to the spawner
+            if (trustablePlayer.getUniqueId().equals(player.getUniqueId())) {
+                continue;
+            }
+
+            ItemStack trustablePlayerItemStack = new ItemStack(Material.PLAYER_HEAD);
+
+            // Set up skull texture
+            SkullMeta skullMeta = (SkullMeta) trustablePlayerItemStack.getItemMeta();
+            skullMeta.setOwningPlayer(trustablePlayer);
+            trustablePlayerItemStack.setItemMeta(skullMeta);
+
+            // Set up other metadata
+            trustablePlayerItemStack.editMeta(meta -> {
+                assert pagedItemTemplate != null;
+                meta.displayName(miniMsg.deserialize(
+                        Objects.requireNonNull(pagedItemTemplate.getString("displayName")),
+                        Placeholder.unparsed("player", trustablePlayer.getName())
+                ).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE));
+
+                meta.lore(
+                        pagedItemTemplate.getStringList("lore").stream().map(loreMsg -> miniMsg.deserialize(
+                                loreMsg
+                        ).decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE)).toList()
+                );
+            });
+
+            pagedItems[iterator] = (ClickableItem.of(trustablePlayerItemStack, e -> {
+                // Cancel the event
+                e.setCancelled(true);
+
+                if (e.isLeftClick()) {
+                    // Add the selected player to the spawner's trusted list
+                    List<String> trustedPlayers = spawnerUtils.getStringListFromBlock(getSpawnerBlock(), getSpawnerMemberKey());
+
+                    // Check that the player is not already trusted
+                    if (trustedPlayers.contains(trustablePlayer.getUniqueId().toString())) {
+                        if (!configHandler.getSpawnerTrustAlreadyTrusted().isEmpty()) {
+                            player.sendMessage(configHandler.getSpawnerTrustAlreadyTrusted());
+                        }
+                        return;
+                    }
+
+                    trustedPlayers.add(trustablePlayer.getUniqueId().toString());
+                    spawnerUtils.storeStringListInBlock(getSpawnerBlock(), trustedPlayers, getSpawnerMemberKey());
+                }
+            }));
+            iterator++;
+        }
+
+        pagination.setItems(pagedItems);
+        pagination.setItemsPerPage(getPagedItemAmount());
+        pagination.addToIterator(contents.newIterator(
+                SlotIterator.Type.HORIZONTAL,
+                menuInformationSection.getInt("pagedItemsStartRow"),
+                menuInformationSection.getInt("pagedItemsStartColumn")
+        ));
     }
 
     @Override
@@ -219,14 +249,6 @@ public class OwnedSpawnerProvider implements InventoryProvider {
         this.menuTitle = menuTitle;
     }
 
-    public String getMobType() {
-        return mobType;
-    }
-
-    public void setMobType(String mobType) {
-        this.mobType = mobType;
-    }
-
     public String getSpawnerOwner() {
         return spawnerOwner;
     }
@@ -235,20 +257,21 @@ public class OwnedSpawnerProvider implements InventoryProvider {
         this.spawnerOwner = spawnerOwner;
     }
 
-    public UUID getSpawnerUUID() {
-        return spawnerUUID;
+
+    public OwnedSpawnerProvider getPreviousMenu() {
+        return previousMenu;
     }
 
-    public void setSpawnerUUID(UUID spawnerUUID) {
-        this.spawnerUUID = spawnerUUID;
+    public void setPreviousMenu(OwnedSpawnerProvider previousMenu) {
+        this.previousMenu = previousMenu;
     }
 
-    public Location getSpawnerLocation() {
-        return spawnerLocation;
+    public int getPagedItemAmount() {
+        return pagedItemAmount;
     }
 
-    public void setSpawnerLocation(Location spawnerLocation) {
-        this.spawnerLocation = spawnerLocation;
+    public void setPagedItemAmount(int pagedItemAmount) {
+        this.pagedItemAmount = pagedItemAmount;
     }
 
     public Block getSpawnerBlock() {
@@ -257,5 +280,13 @@ public class OwnedSpawnerProvider implements InventoryProvider {
 
     public void setSpawnerBlock(Block spawnerBlock) {
         this.spawnerBlock = spawnerBlock;
+    }
+
+    public NamespacedKey getSpawnerMemberKey() {
+        return spawnerMemberKey;
+    }
+
+    public void setSpawnerMemberKey(NamespacedKey spawnerMemberKey) {
+        this.spawnerMemberKey = spawnerMemberKey;
     }
 }

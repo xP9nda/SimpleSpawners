@@ -45,6 +45,7 @@ public class SpawnerHandler implements Listener {
 
     private final NamespacedKey spawnerUUIDKey;
     private final NamespacedKey spawnerOwnerKey;
+    private final NamespacedKey spawnerMembersKey;
     private final NamespacedKey mobTypeKey;
 
     private HashMap<UUID, SpawnerData> cachedSpawners = new HashMap<>();
@@ -63,6 +64,7 @@ public class SpawnerHandler implements Listener {
         // Set up namespace item keys
         spawnerUUIDKey = new NamespacedKey(simpleSpawnersPlugin, "uuid");
         spawnerOwnerKey = new NamespacedKey(simpleSpawnersPlugin, "owner");
+        spawnerMembersKey = new NamespacedKey(simpleSpawnersPlugin, "members");
         mobTypeKey = new NamespacedKey(simpleSpawnersPlugin, "mobtype");
 
         // todo: load in all saved spawners to the cachedSpawners hashmap
@@ -108,6 +110,7 @@ public class SpawnerHandler implements Listener {
 
         dataContainer.set(spawnerUUIDKey, PersistentDataType.STRING, spawnerData.getSpawnerUUID().toString());
         dataContainer.set(spawnerOwnerKey, PersistentDataType.STRING, player.getUniqueId().toString());
+        dataContainer.set(spawnerMembersKey, PersistentDataType.STRING, "");
 
         // Get the held item's data
         PersistentDataContainer heldItemDataContainer = handItem.getItemMeta().getPersistentDataContainer();
@@ -253,6 +256,8 @@ public class SpawnerHandler implements Listener {
         // select the correct menu to open and set up variables
         ConfigurationSection menuToOpen;
         String spawnerMobTypeString = spawnerUtils.capitalizeWords(spawnerUtils.getSpawnerMobType(clickedBlock).name().toLowerCase());
+
+        // Unowned spawner
         if (spawnerOwnerUUIDString == null) {
             // Get the appropriate config sections
             menuToOpen = configHandler.getUnownedMenuConfigurationSection();
@@ -270,14 +275,33 @@ public class SpawnerHandler implements Listener {
 
             unownedInventory.buildInventory();
             unownedInventory.openBuiltInventory(player);
-        } else {
+        }
+        // Owned spawner
+        else {
             // Check if the player who interacted with the spawner owns the spawner and send an appropriate message
             if (!spawnerOwnerUUIDString.equals(player.getUniqueId().toString())) {
-                if (!configHandler.getSpawnerOpenFailedMessage().isEmpty()) {
-                    player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerOpenFailedMessage()));
+                // Check if the player who interacted with the spawner is in the spawner owner's trusted list
+                List<String> trustedList = spawnerUtils.getStringListFromBlock(clickedBlock, spawnerMembersKey);
+                boolean playerTrusted = false;
+                for ( String stringUUID : trustedList ) {
+                    if (stringUUID.equalsIgnoreCase(player.getUniqueId().toString())) {
+                        // Open the spawner for the player
+                        if (!configHandler.getSpawnerOpenMessage().isEmpty()) {
+                            player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerOpenMessage()));
+                        }
+                        playerTrusted = true;
+                        break;
+                    }
                 }
-                return;
+
+                // Send the player a message if they are not trusted or do not own the spawner
+                if (!playerTrusted && !configHandler.getSpawnerOpenFailedMessage().isEmpty()) {
+                    player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerOpenFailedMessage()));
+                    return;
+                }
             }
+
+            // Send the player a message telling them that they are opening a spawner
             if (!configHandler.getSpawnerOpenMessage().isEmpty()) {
                 player.sendMessage(miniMsg.deserialize(configHandler.getSpawnerOpenMessage()));
             }
@@ -292,6 +316,7 @@ public class SpawnerHandler implements Listener {
             ownedInventory.setRows(menuInformationSection.getInt("rows"));
             ownedInventory.setMenuTitle(menuInformationSection.getString("title"));
             ownedInventory.setSpawnerLocation(clickedBlock.getLocation());
+            ownedInventory.setSpawnerBlock(clickedBlock);
 
             ownedInventory.setMobType(spawnerMobTypeString);
             ownedInventory.setSpawnerOwner(spawnerUtils.getPlayerNameFromUUID(UUID.fromString(spawnerOwnerUUIDString)));
@@ -301,5 +326,9 @@ public class SpawnerHandler implements Listener {
             ownedInventory.buildInventory();
             ownedInventory.openBuiltInventory(player);
         }
+    }
+
+    public NamespacedKey getSpawnerMembersKey() {
+        return spawnerMembersKey;
     }
 }
